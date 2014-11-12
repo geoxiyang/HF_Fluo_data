@@ -6,19 +6,21 @@
 % SIFyield is daily SIF/daily APAR
 
 
-load('hf_barn_2013_env.mat','apar_daily','apar','doy')
+load('hf_barn_2013_env.mat','apar_daily','apar','doy','par')
 load('HF_2013_GPP.mat','gpp_day')
 load('SIF760daily.mat','SIF_mean','SIF_1330','SIF_0930','SIF_1400','VPD_0930','VPD_1400')
 
 apar_1330 = zeros(130,1);
 apar_1400 = zeros(130,1);
 apar_0930 = zeros(130,1);
+par_0930  = zeros(130,1);
 
 for uni_i = 1:130
    
    apar_1330(uni_i,1) = apar(doy>=uni_i+169+13.4/24.0 & doy<uni_i+169+13.6/24.0);
    apar_0930(uni_i,1) = apar(doy>=uni_i+169+09.4/24.0 & doy<uni_i+169+09.6/24.0);
    apar_1400(uni_i,1) = apar(doy>=uni_i+169+13.9/24.0 & doy<uni_i+169+14.1/24.0);
+   par_0930(uni_i,1)  = par(doy>=uni_i+169+09.4/24.0 & doy<uni_i+169+09.6/24.0);
    
 end
 
@@ -46,8 +48,20 @@ SIFyield = SIF_mean(:,2)./apar_daily;
 SIFyield_sun = SIF_mean(:,3)./apar_daily;
 SIFyield_cloud = SIF_mean(:,4)./apar_daily;
 
-plot(sif_yield_0930(sif_yield_0930(:,2)>0,2),VPD_0930(sif_yield_0930(:,2)>0,2),'ko');
-plot(sif_yield_1400(sif_yield_1400(:,2)>0,2),VPD_1400(sif_yield_1400(:,2)>0,2),'ko');
+%plot(sif_yield_0930(sif_yield_0930(:,2)>0,1),sif_yield_0930(sif_yield_0930(:,2)>0,2),'ro')
+
+plot(sif_yield_0930(sif_yield_0930(:,3)>0,1),sif_yield_0930(sif_yield_0930(:,3)>0,3),'ro','MarkerSize',12)
+hold on
+plot(sif_yield_0930(sif_yield_0930(:,4)>0,1),sif_yield_0930(sif_yield_0930(:,4)>0,4),'bo','MarkerSize',12)
+xlabel('Day of Year','FontName','Whitney','FontSize',20)
+ylabel('SIF/APAR','FontName','Whitney','FontSize',20)
+set(gca,'FontName','Whitney','FontSize',16);
+set(gcf,'paperPositionMode','auto') 
+print(gcf, '-dpng','-r300', '/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/SIFy_Season.png')
+
+
+% plot(sif_yield_0930(sif_yield_0930(:,2)>0,2),VPD_0930(sif_yield_0930(:,2)>0,2),'ko');
+% plot(sif_yield_1400(sif_yield_1400(:,2)>0,2),VPD_1400(sif_yield_1400(:,2)>0,2),'ko');
 
 
 % figure
