@@ -4,36 +4,37 @@
 clear all
 
 % load('SIF760_result.mat','final_result_time');
-load('SIF760_2014_result.mat','raw_final_result');
-%load('hf_barn_2013_env.mat','cloud_ratio_daily');
+% load('SIF760_2014_result.mat','raw_final_result');
+load('hf_2013_svd.mat','final_svd');
+load('hf_barn_2013_env.mat','cloud_ratio_daily');
 
 % DOY 170-299: 130 ; 2014: 127-280
-daily_raw_result = zeros(154,3);
-daily_raw_result(:,1) = 127:1:280; %170:1:299;
+daily_raw_result = zeros(130,3);  %154,3
+daily_raw_result(:,1) = 170:1:299; %170:1:299;127:1:280
 
-halfhourly_result = zeros(154*48,2);
-halfhourly_result(:,1) = 127:(1/48):(281-1/48);
+halfhourly_result = zeros(130*48,2);  %154*48,2
+halfhourly_result(:,1) = 170:(1/48):(300-1/48);  %127:(1/48):(281-1/48);
 
 % fivemin_result = zeros(130*48*6,2);
 % fivemin_result(:,1) = 170:(1/288):(300-1/288);
 
-SIF_0930 = zeros(154,4);
-SIF_0930(:,1) = 127:1:280;
+SIF_0930 = zeros(130,4);    %130
+SIF_0930(:,1) = 170:1:299;  %170:1:299 ; 127:1:288
 
-SIF_1330 = zeros(154,4);
-SIF_1330(:,1) = 127:1:280;
+SIF_1330 = zeros(130,4);
+SIF_1330(:,1) = 170:1:299;
 
-SIF_1400 = zeros(154,4);
-SIF_1400(:,1) = 127:1:280;
+SIF_1400 = zeros(130,4);
+SIF_1400(:,1) = 170:1:299;
 
-SIF_1430 = zeros(154,4);
-SIF_1430(:,1) = 127:1:280;
+SIF_1430 = zeros(130,4);
+SIF_1430(:,1) = 170:1:299;
 
-SIF_mean = zeros(154,4);
-SIF_mean(:,1) = 127:1:280;
+SIF_mean = zeros(130,4);
+SIF_mean(:,1) = 170:1:299;
 
-SIF_max = zeros(154,4);
-SIF_max(:,1) = 127:1:280;
+SIF_max = zeros(130,4);
+SIF_max(:,1) = 170:1:299;
 
 % VPD_0930 = zeros(130,4);
 % SIF_0930(:,1) = 170:1:299;
@@ -41,23 +42,30 @@ SIF_max(:,1) = 127:1:280;
 % VPD_1400 = zeros(130,4);
 % VPD_1400(:,1) = 170:1:299;
 
-for uni_i = 1:154 %1:130
+for uni_i = 1:130 %1:130; 1:154
    
    % Define the time
-   lb = uni_i-1.0+127.;
-   ub = uni_i+127;
+   lb = uni_i-1.0+170.;  %127
+   ub = uni_i+170;
    % step 1: select good days
-   sub_temp = raw_final_result(:,1) >= lb & raw_final_result(:,1) <= ub & raw_final_result(:,3) >=0.90;
-   morning_sub = raw_final_result(:,1) >= lb & raw_final_result(:,1) <= (lb+0.5) & raw_final_result(:,3) >=0.90;
-   afternoon_sub = raw_final_result(:,1) >= (lb+0.5) & raw_final_result(:,1) <= ub & raw_final_result(:,3) >=0.90;
+%    sub_temp = raw_final_result(:,1) >= lb & raw_final_result(:,1) <= ub & raw_final_result(:,3) >=0.90;
+%    morning_sub = raw_final_result(:,1) >= lb & raw_final_result(:,1) <= (lb+0.5) & raw_final_result(:,3) >=0.90;
+%    afternoon_sub = raw_final_result(:,1) >= (lb+0.5) & raw_final_result(:,1) <= ub & raw_final_result(:,3) >=0.90;
+%    if (sum(sub_temp) == 0) | (sum(morning_sub) < 10) | (sum(afternoon_sub) < 10)
+%       continue 
+%    end
+   sub_temp = final_svd(:,1) >= lb & final_svd(:,1) <= ub & final_svd(:,3) <=0.05;
+   morning_sub = final_svd(:,1) >= lb & final_svd(:,1) <= (lb+0.5) & final_svd(:,3) <=0.05;
+   afternoon_sub = final_svd(:,1) >= (lb+0.5) & final_svd(:,1) <= ub & final_svd(:,3) <=0.05;
    if (sum(sub_temp) == 0) | (sum(morning_sub) < 10) | (sum(afternoon_sub) < 10)
       continue 
-   end
-   
+   end   
    % step 2: linear-interpolation to every 30 minutes between 6am to 6pm
    
-   temp_time    = raw_final_result(sub_temp, 1);
-   temp_array   = raw_final_result(sub_temp, 2);
+%    temp_time    = raw_final_result(sub_temp, 1);
+%    temp_array   = raw_final_result(sub_temp, 2);
+   temp_time    = final_svd(sub_temp, 1);
+   temp_array   = final_svd(sub_temp, 2);
    %vpd_array    = vpd15fill(sub_temp,1);
    % negative values are assigned to zero
    temp_array(temp_array<0) = 0;
@@ -78,25 +86,25 @@ for uni_i = 1:154 %1:130
 %    VPD_1400(uni_i,2) = vpd_array(sub_1400);
 %    
 %    
-%    if cloud_ratio_daily(uni_i) < 0.50 
-%        SIF_0930(uni_i,3) = temp_array(sub_0930);   
-%        SIF_mean(uni_i,3) = mean(temp_array(temp_array>0));
-%        SIF_max(uni_i,3)  = max(temp_array(temp_array>0));
-%        SIF_1330(uni_i,3) = temp_array(sub_1330);
-%        SIF_1400(uni_i,3) = temp_array(sub_1400);
-%        SIF_1430(uni_i,3) = temp_array(sub_1430);
+   if cloud_ratio_daily(uni_i) < 0.50 
+       SIF_0930(uni_i,3) = temp_array(sub_0930);   
+       SIF_mean(uni_i,3) = mean(temp_array(temp_array>0));
+       SIF_max(uni_i,3)  = max(temp_array(temp_array>0));
+       SIF_1330(uni_i,3) = temp_array(sub_1330);
+       SIF_1400(uni_i,3) = temp_array(sub_1400);
+       SIF_1430(uni_i,3) = temp_array(sub_1430);
 %        VPD_0930(uni_i,3) = vpd_array(sub_0930);
 %        VPD_1400(uni_i,3) = vpd_array(sub_1400);
-%    else
-%        SIF_0930(uni_i,4) = temp_array(sub_0930);   
-%        SIF_mean(uni_i,4) = mean(temp_array(temp_array>0));
-%        SIF_max(uni_i,4)  = max(temp_array(temp_array>0));
-%        SIF_1330(uni_i,4) = temp_array(sub_1330);
-%        SIF_1400(uni_i,4) = temp_array(sub_1400);
-%        SIF_1430(uni_i,4) = temp_array(sub_1430);
+   else
+       SIF_0930(uni_i,4) = temp_array(sub_0930);   
+       SIF_mean(uni_i,4) = mean(temp_array(temp_array>0));
+       SIF_max(uni_i,4)  = max(temp_array(temp_array>0));
+       SIF_1330(uni_i,4) = temp_array(sub_1330);
+       SIF_1400(uni_i,4) = temp_array(sub_1400);
+       SIF_1430(uni_i,4) = temp_array(sub_1430);
 %        VPD_0930(uni_i,4) = vpd_array(sub_0930);
 %        VPD_1400(uni_i,4) = vpd_array(sub_1400);    
-%    end
+   end
 %           
     time_sub = find(halfhourly_result(((uni_i-1)*48+1):(uni_i*48),1)<temp_time(1) | halfhourly_result(((uni_i-1)*48+1):(uni_i*48),1)>temp_time(end));
     
@@ -141,6 +149,6 @@ for uni_i = 1:154 %1:130
 end
 
 
-save('SIF760daily_2014.mat');
+save('SIF760daily_2013_SVD.mat');
 
 
