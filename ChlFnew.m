@@ -7,7 +7,7 @@
 
 
 % clear all
-%clc
+% clc
 
 tic
 
@@ -25,12 +25,12 @@ rmse        = NaN(file_no);
 ref         = NaN(file_no(1),2048); % 2048 sampling intervals
 sif_svd     = NaN(file_no);
 sif_error   = NaN(file_no);
-
+f760_error  = NaN(file_no);
 
 irrad_time  = NaN(file_no);
 rad_time    = NaN(file_no);
 
-% Store the time of each measurement
+%Store the time of each measurement
 % for i = 1:file_no(1)
 % 	fname   = fullfile(strcat(datapath,'rad/',rad_path(i).name));
 %     fname0  = fullfile(strcat(datapath,'irrad/',irrad_path(i).name));
@@ -52,30 +52,38 @@ load('hf_2013_svd.mat','rad_time','irrad_time')
 jj=0;
 
 %4461 = DOY 175 around 13:30
+%4430 = DOY 175 around 11:00
 
-for j = 4461:4461 %1:file_no(1)
+for j=1:file_no(1)%1:file_no(1) %1:file_no(1) %1:file_no(1)   4430:4430
 	tenmin          = datenum([2013 1 1 0 10 0]) - datenum([2013 1 1 0 0 0]);
     irrad_time_tmp  = irrad_time(j);
-    time(j)         = irrad_time(j);
     rad_time_sub    = find((rad_time - irrad_time_tmp)>0 & (rad_time - irrad_time_tmp)<tenmin);
 
     % if the number of subscript that fit the above criteria is less than
     % one, then quit the loop
-    if ~(length(rad_time_sub) == 1)
+    if (numel(rad_time_sub) == 0)
         continue
     end
     
     % open the irradiance file
-    fname_irrad = fullfile(strcat(datapath,'irrad/',irrad_path(j).name));
+    
+    n = 1;
+    temp_final = [];
+    for kk = 1:n
+    fname_irrad = fullfile(strcat(datapath,'irrad/',irrad_path(j+kk).name));
     temp_irrad  = dlmread(fname_irrad, ' ',3, 0);
+    temp_final  = [temp_final;temp_irrad(:,3)'];
+    end
     % open the radiance file
     fname_rad   = fullfile(strcat(datapath,'rad/',rad_path(rad_time_sub(1)).name));
     temp_rad    = dlmread(fname_rad, ' ',3, 0);
-     
-    ref(j,:) = (temp_rad(:,3).*coeff(:,2))./(temp_irrad(:,3).*coeff(:,1));
+
+% SFM method =============
+
+    ref(j,:) = (temp_rad(:,3).*coeff(:,2))./((temp_irrad(:,3).*coeff(:,1))./pi());
     wl       = temp_rad(:,5);
-    
-    %For O2A: 759-767.76, centered 760;
+   
+    % For O2A: 759-767.76, centered 760;
     roi         = temp_rad(:,5)>759.00 & temp_rad(:,5)<767.76;     
     wavelength  = temp_rad(roi,5);
     rad         = temp_rad(roi,3).*coeff(roi,2);
@@ -93,32 +101,51 @@ for j = 4461:4461 %1:file_no(1)
     SStotal = (length(ydata)-1) * var(ydata);
     rsq(j) = 1 - SSresid/SStotal;
     rmse(j) = (SSresid/(length(ydata)))^(0.5);
-    %For O2A: center 760
-    f760(j) = 760.0*x(4)+x(3);   
+    % For O2A: center 760
+    f760(j) = 760.0*x(4)+x(3);  
     
-    spectra = struct('irrad', temp_irrad(:,3)',...
-                     'rad', temp_rad(:,3)',...
-                     'ircoeff', coeff(:,1),...
-                     'rcoeff', coeff(:,2),...
-                     'wl', temp_rad(:,5));
-    WL_range = [745.00,775.00];
-    SIF = SIF_SVD(spectra,WL_range);
-    sif_svd(j) = SIF.SIF;
-    sif_error(j) = SIF.SIF_error;
-%    sif_day = [time_day,sif_svd(rad_idx)];
-    
-    
+    [beta,resid,J,Sigma] = nlinfit(xdata,ydata,@radtrans,x0);
+    [ci,se]   = nlparci(beta,resid,'covar',Sigma);
+    f760_error(j) = sqrt((760*se(4))^2+se(3)^2); %1-sigma error of SIF
+% %SVD method=================
+% % temp_irrad(:,3)'
+%     spectra = struct('irrad', temp_final,...
+%                      'rad', temp_rad(:,3)',...
+%                      'ircoeff', coeff(:,1),...
+%                      'rcoeff', coeff(:,2),...
+%                      'wl', temp_rad(:,5));
+%     WL_range = [745.00,780.00]; % Including O2A: 717.00 780.00; 745.00 780.00
+%     SIF_result = SIF_SVD(spectra,WL_range,2,1,0.02,6);
+%     sif_svd(j) = SIF_result.SIF;
+%     sif_error(j) = SIF_result.SIF_error;
+% %    sif_day = [time_day,sif_svd(rad_idx)];
+%     
+% 
+% % record the time -- if the run went through
+%     time(j)         = irrad_time(j);
     
     
 end
+% Store the reflectance
+ref_final       = [time, ref];
+ref_final_time  = sortrows(ref_final,1);
+raw_ref_result  = ref_final_time;
 
+% Store SIF results
+final_result = [time, f760, rsq, rmse];
 
+% Time selection
+final_result_time = sortrows(final_result,1);
 
+raw_final_result = final_result_time;
+save('SIF760_result.mat');
 
+% final_sfm = [time,f760,rsq,rmse];
+% final_sfm = sortrows(final_sfm,1);
 % final_svd = [time,sif_svd,sif_error];
 % final_svd = sortrows(final_svd,1);
-% 
-% save('hf_2013_svd.mat','rad_time','irrad_time','final_svd');
+
+% save('hf_2013_svd.mat','rad_time','irrad_time','final_svd','final_sfm');
 
 % SVD method
 % for kk = 175:175

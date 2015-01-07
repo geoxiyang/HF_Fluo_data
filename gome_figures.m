@@ -57,14 +57,15 @@ for jj = ceil(170/7):(row/7)
                                    SIF_0930_2(:,1) <  (jj*7+1),2);
     SIF_0930_SUN_WEEK(jj) = median(SIF_0930_SUN_TEMP);
 end
-%set(gca,'xlim',[170 299]);
+set(gca,'xlim',[170 299]);
 
 % [h1,hp] = boundedline(1:7:row, mean_sif_all_sg.*0.582, sd_sif_all, 'ro-','transparency', 0.1);
 
 [h1,hp] = boundedline(1:7:row, sif_year(:,7).*0.582, sd_sif_all, 'ro-','transparency', 0.1);
+set(h1,'MarkerSize',16,'LineWidth',2);
 
 hold on
-h3 = plot(1:7:row,SIF_0930_SUN_WEEK,'bo','MarkerSize',12);
+h3 = plot(1:7:row,SIF_0930_SUN_WEEK,'bo','MarkerSize',16,'LineWidth',2);
 
 hold off
 %plot(SIF_0930_SUN_WEEK(ceil(170/7):(row/7)),mean_sif_all_sg(ceil(170/7):(row/7)),'b*')

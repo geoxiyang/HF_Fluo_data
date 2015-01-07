@@ -3,9 +3,9 @@
 
 clear all
 
-% load('SIF760_result.mat','final_result_time');
+load('SIF760_result.mat','final_result_time','rmse');
 % load('SIF760_2014_result.mat','raw_final_result');
-load('hf_2013_svd.mat','final_svd');
+% load('hf_2013_svd.mat','final_svd');
 load('hf_barn_2013_env.mat','cloud_ratio_daily');
 
 % DOY 170-299: 130 ; 2014: 127-280
@@ -36,6 +36,8 @@ SIF_mean(:,1) = 170:1:299;
 SIF_max = zeros(130,4);
 SIF_max(:,1) = 170:1:299;
 
+
+
 % VPD_0930 = zeros(130,4);
 % SIF_0930(:,1) = 170:1:299;
 % 
@@ -48,24 +50,24 @@ for uni_i = 1:130 %1:130; 1:154
    lb = uni_i-1.0+170.;  %127
    ub = uni_i+170;
    % step 1: select good days
-%    sub_temp = raw_final_result(:,1) >= lb & raw_final_result(:,1) <= ub & raw_final_result(:,3) >=0.90;
-%    morning_sub = raw_final_result(:,1) >= lb & raw_final_result(:,1) <= (lb+0.5) & raw_final_result(:,3) >=0.90;
-%    afternoon_sub = raw_final_result(:,1) >= (lb+0.5) & raw_final_result(:,1) <= ub & raw_final_result(:,3) >=0.90;
-%    if (sum(sub_temp) == 0) | (sum(morning_sub) < 10) | (sum(afternoon_sub) < 10)
-%       continue 
-%    end
-   sub_temp = final_svd(:,1) >= lb & final_svd(:,1) <= ub & final_svd(:,3) <=0.05;
-   morning_sub = final_svd(:,1) >= lb & final_svd(:,1) <= (lb+0.5) & final_svd(:,3) <=0.05;
-   afternoon_sub = final_svd(:,1) >= (lb+0.5) & final_svd(:,1) <= ub & final_svd(:,3) <=0.05;
+   sub_temp = raw_final_result(:,1) >= lb & raw_final_result(:,1) <= ub & raw_final_result(:,3) >=0.90;
+   morning_sub = raw_final_result(:,1) >= lb & raw_final_result(:,1) <= (lb+0.5) & raw_final_result(:,3) >=0.90;
+   afternoon_sub = raw_final_result(:,1) >= (lb+0.5) & raw_final_result(:,1) <= ub & raw_final_result(:,3) >=0.90;
    if (sum(sub_temp) == 0) | (sum(morning_sub) < 10) | (sum(afternoon_sub) < 10)
       continue 
-   end   
+   end
+%    sub_temp = final_svd(:,1) >= lb & final_svd(:,1) <= ub & final_svd(:,2) <=3.0;
+%    morning_sub = final_svd(:,1) >= lb & final_svd(:,1) <= (lb+0.5) & final_svd(:,2) <=3.0;
+%    afternoon_sub = final_svd(:,1) >= (lb+0.5) & final_svd(:,1) <= ub & final_svd(:,2) <=3.0;
+%    if (sum(sub_temp) == 0) | (sum(morning_sub) < 10) | (sum(afternoon_sub) < 10)
+%       continue 
+%    end   
    % step 2: linear-interpolation to every 30 minutes between 6am to 6pm
    
-%    temp_time    = raw_final_result(sub_temp, 1);
-%    temp_array   = raw_final_result(sub_temp, 2);
-   temp_time    = final_svd(sub_temp, 1);
-   temp_array   = final_svd(sub_temp, 2);
+   temp_time    = raw_final_result(sub_temp, 1);
+   temp_array   = raw_final_result(sub_temp, 2);
+%    temp_time    = final_svd(sub_temp, 1);
+%    temp_array   = final_svd(sub_temp, 2);
    %vpd_array    = vpd15fill(sub_temp,1);
    % negative values are assigned to zero
    temp_array(temp_array<0) = 0;
@@ -149,6 +151,6 @@ for uni_i = 1:130 %1:130; 1:154
 end
 
 
-save('SIF760daily_2013_SVD.mat');
+%save('SIF760daily_2013_SVD.mat');
 
 

@@ -18,16 +18,24 @@ Rshort = data_30min(:,5);
 % f470 = data_30min(:,87);
 % f530 = data_30min(:,83);
 % f570 = data_30min(:,84);
+% out_570 = data_30min(:,76);
+% in_570  = data_30min(:,68);
+% out_530 = data_30min(:,75);
+% in_530  = data_30min(:,67);
+% 
+% 
+% f530_1 = out_530./in_530;
+% f570_1 = out_570./in_570;
 % 
 % diffuse_rad = data_30min(:,43);
 % direct_rad = data_30min(:,44);
 % total_rad = data_30min(:,42);
 % 
-% below1_rad = data_30min(:,41);
-% below2_rad = data_30min(:,40);
-% below3_rad = data_30min(:,19);
-% ref_rad = data_30min(:,18);
-% above_rad = data_30min(:,17);
+below1_rad = data_30min(:,41);
+below2_rad = data_30min(:,40);
+below3_rad = data_30min(:,19);
+ref_rad = data_30min(:,18);
+above_rad = data_30min(:,17);
 % 
 % cloud_ratio = diffuse_rad ./total_rad;
 % apar = above_rad - ref_rad - nanmean([below1_rad,below2_rad,below3_rad],2);
@@ -35,6 +43,8 @@ Rshort = data_30min(:,5);
 % par = above_rad;
 % evi = 2.5 * (f860-f655)./(f860 + 6*f655-7.5*f470+1);
 % pri = (f530-f570)./(f530+f570);
+% pri2= data_30min(:,91);
+% pri3= (f530_1-f570_1)./(f530_1+f570_1);
 % gpp_raw(gpp_raw<0) = nan;
 % apar(apar<0) = nan;
 % lue_raw = gpp_raw./apar;
@@ -47,6 +57,8 @@ Rshort_daily =  nan(numel(unidoy),1);
 % ndvi_daily = nan(numel(unidoy),1);
 % evi_daily = nan(numel(unidoy),1);
 % pri_daily = nan(numel(unidoy),1);
+% pri2_daily= nan(numel(unidoy),1);
+% pri3_daily= nan(numel(unidoy),1);
 % % LAI = nan(numel(unidoy),1);
 % cloud_ratio_daily = nan(numel(unidoy),1);
 % apar_daily = nan(numel(unidoy),1);
@@ -62,7 +74,7 @@ for kk = 1:numel(unidoy)  %1:numel(unidoy)
    lb = double(unidoy(kk))+0/24;
    ub = double(unidoy(kk))+24/24;
    
-   Rshort_daily(kk) = mean(Rshort(doy>=lb & doy<=ub));
+   Rshort_daily(kk) = mean(Rshort(doy>=lb & doy<ub));
    
 %   tmin_daily(kk) = min(Temp(doy>=lb & doy<=ub));
 %    lb_mid = double(unidoy(kk))+11/24;
@@ -77,7 +89,9 @@ for kk = 1:numel(unidoy)  %1:numel(unidoy)
 %   cloud_ratio_daily(kk) = mean(cloud_ratio(doy>=lb & doy<=ub));
 %    
 %    % PRI is the average of that day
-%    pri_daily(kk) = nanmean(pri(doy>=lb & doy<ub));
+%     pri_daily(kk) = nanmean(pri(doy>=lb & doy<ub & abs(pri) <= 0.2));
+%     pri2_daily(kk)= nanmean(pri2(doy>=lb & doy<ub & abs(pri) <= 0.2));
+%     pri3_daily(kk)= nanmean(pri2(doy>=lb & doy<ub & abs(pri) <= 0.2));
 %   ndvi_daily(kk) = nanmean(ndvi(doy>=lb & doy<ub));
 %    evi_daily(kk) = nanmean(evi(doy>=lb & doy<ub));
 %    
