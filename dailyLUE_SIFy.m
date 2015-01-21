@@ -5,10 +5,11 @@
 % daily LUE.
 % SIFyield is daily SIF/daily APAR
 
+datapath = '/Volumes/XiYangResearch/Projects/9.Fluorescence/11.Matlab_data/';
 
-load('hf_barn_2013_env.mat','apar_daily','apar','doy','par','cloud_ratio','cloud_ratio_daily')
-load('HF_2013_GPP.mat','gpp_day','gpp_raw')
-load('SIF760daily.mat','SIF_mean','SIF_1330','SIF_0930','SIF_1400','halfhourly_result')
+load([datapath,'hf_barn_2013_env.mat'],'apar_daily','apar','doy','par','cloud_ratio','cloud_ratio_daily')
+load([datapath,'HF_2013_GPP.mat'],'gpp_day','gpp_raw')
+load([datapath,'SIF760daily.mat'],'SIF_mean','SIF_1330','SIF_0930','SIF_1400','halfhourly_result')
 
 apar_1330 = zeros(130,1);
 apar_1400 = zeros(130,1);
@@ -98,21 +99,21 @@ subs3 = LUE_day(:,2) > 0 & SIFy_day(:,2) >0;
 subs4 = LUE_day(:,3) > 0 & SIFy_day(:,3) >0;
 % 
 % APAR vs LUE and SIFy
-[AX,H1,H2] = plotyy(apar_daily(subs2),LUE_day(subs2,1),apar_daily(subs2),SIFy_day(subs2,1));
-ylabel(AX(1),'LUE(umol CO_{2}/umol photon)','FontName','Whitney','FontSize',20);
-ylabel(AX(2),'SIF/APAR','FontName','Whitney','FontSize',20);
-set(H1,'linestyle','none','marker','o','color','r');
-set(H2,'linestyle','none','marker','o','color','m');
-xlabel(AX(1),'APAR(umol/m^{2}/second)','FontName','Whitney','FontSize',20);
-set(gcf,'paperPositionMode','auto')
-
-hold on 
-[AX2,H12,H22] = plotyy(apar_daily(subs4),LUE_day(subs4,1),apar_daily(subs4),SIFy_day(subs4,1));
-ylabel(AX2(1),'LUE(umol CO_{2}/umol photon)','FontName','Whitney','FontSize',20);
-ylabel(AX2(2),'SIF/APAR','FontName','Whitney','FontSize',20);
-set(H12,'linestyle','none','marker','.','color','r');
-set(H22,'linestyle','none','marker','.','color','m');
-xlabel(AX2(1),'APAR(umol/m^{2}/second)','FontName','Whitney','FontSize',20);
+% [AX,H1,H2] = plotyy(apar_daily(subs2),LUE_day(subs2,1),apar_daily(subs2),SIFy_day(subs2,1));
+% ylabel(AX(1),'LUE(umol CO_{2}/umol photon)','FontName','Whitney','FontSize',20);
+% ylabel(AX(2),'SIF/APAR','FontName','Whitney','FontSize',20);
+% set(H1,'linestyle','none','marker','o','color','r');
+% set(H2,'linestyle','none','marker','o','color','m');
+% xlabel(AX(1),'APAR(umol/m^{2}/second)','FontName','Whitney','FontSize',20);
+% set(gcf,'paperPositionMode','auto')
+% 
+% hold on 
+% [AX2,H12,H22] = plotyy(apar_daily(subs4),LUE_day(subs4,1),apar_daily(subs4),SIFy_day(subs4,1));
+% ylabel(AX2(1),'LUE(umol CO_{2}/umol photon)','FontName','Whitney','FontSize',20);
+% ylabel(AX2(2),'SIF/APAR','FontName','Whitney','FontSize',20);
+% set(H12,'linestyle','none','marker','.','color','r');
+% set(H22,'linestyle','none','marker','.','color','m');
+% xlabel(AX2(1),'APAR(umol/m^{2}/second)','FontName','Whitney','FontSize',20);
 % 
 % 
 % x =  [ones(numel(apar_daily(sub2,1)),1),LUE_day(subs2,1)];
@@ -125,8 +126,38 @@ xlabel(AX2(1),'APAR(umol/m^{2}/second)','FontName','Whitney','FontSize',20);
 % 
 % 
 % 
-% plot(LUE_day(subs2),SIFy_day(subs2),'ko','MarkerSize',16)
+
+% indice = 1:125;
+% plot(LUE_day(indice,1),SIFy_day(indice,1),'ko','MarkerSize',16)
+% corr(LUE_day(indice,1),SIFy_day(indice,1))^2
+% x = [ones(numel(LUE_day(indice,1)),1),LUE_day(indice,1)];
+% [b,bint,r,rint,stats] = regress(SIFy_day(indice,1),x);
 % 
+% xlabel('LUE(umol CO_{2}/umol photon)','FontName','Whitney','FontSize',20)
+% ylabel('SIF/APAR','FontName','Whitney','FontSize',20)
+% set(gca,'FontName','Whitney','FontSize',16);
+% set(gcf,'paperPositionMode','auto') 
+% 
+% xlim_fig = xlim;
+% ylim_fig = ylim;
+% 
+% wdth = xlim_fig(2)-xlim_fig(1);
+% ht = ylim_fig(2)-ylim_fig(1);
+% pos = [xlim_fig(1)+0.02*wdth ylim_fig(2)-0.05*ht];
+% text(pos(1),pos(2),'R^{2} = 0.3868     p=0.0000','FontSize',20,'FontName','Whitney-Book');
+% 
+% hold on
+% xint = (max(LUE_day(indice,1)) - min(LUE_day(indice,1)))/100.0;
+% xfit = min(LUE_day(indice,1)):xint:max(LUE_day(indice,1));
+% yfit = b(1) + b(2) * xfit;
+% 
+% plot(xfit,yfit,'b-');
+% 
+% hold off
+
+% 
+% plot(LUE_day(subs2),SIFy_day(subs2),'ko','MarkerSize',16)
+% corr(LUE_day(subs2),SIFy_day(subs2))^2
 % x = [ones(numel(LUE_day(subs2,1)),1),LUE_day(subs2,1)];
 % [b,bint,r,rint,stats] = regress(SIFy_day(subs2,1),x);
 % 

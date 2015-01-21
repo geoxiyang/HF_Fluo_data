@@ -3,10 +3,12 @@
 
 clear all
 
-load('SIF760_result.mat','final_result_time','rmse');
-% load('SIF760_2014_result.mat','raw_final_result');
+datapath = '/Volumes/XiYangResearch/Projects/9.Fluorescence/11.Matlab_data/';
+load([datapath,'SIF760_result.mat'],'final_result_time','rmse');
+load([datapath,'SIF760daily.mat'],'vpd15fill');
+% load('SIF760_2014_result.mat','final_result_time');
 % load('hf_2013_svd.mat','final_svd');
-load('hf_barn_2013_env.mat','cloud_ratio_daily');
+load([datapath,'hf_barn_2013_env.mat'],'cloud_ratio_daily');
 
 % DOY 170-299: 130 ; 2014: 127-280
 daily_raw_result = zeros(130,3);  %154,3
@@ -14,6 +16,8 @@ daily_raw_result(:,1) = 170:1:299; %170:1:299;127:1:280
 
 halfhourly_result = zeros(130*48,2);  %154*48,2
 halfhourly_result(:,1) = 170:(1/48):(300-1/48);  %127:(1/48):(281-1/48);
+vpd_30min = zeros(130*48,2);
+vpd_30min(:,1) = 170:(1/48):(300-1/48);
 
 % fivemin_result = zeros(130*48*6,2);
 % fivemin_result(:,1) = 170:(1/288):(300-1/288);
@@ -50,9 +54,9 @@ for uni_i = 1:130 %1:130; 1:154
    lb = uni_i-1.0+170.;  %127
    ub = uni_i+170;
    % step 1: select good days
-   sub_temp = raw_final_result(:,1) >= lb & raw_final_result(:,1) <= ub & raw_final_result(:,3) >=0.90;
-   morning_sub = raw_final_result(:,1) >= lb & raw_final_result(:,1) <= (lb+0.5) & raw_final_result(:,3) >=0.90;
-   afternoon_sub = raw_final_result(:,1) >= (lb+0.5) & raw_final_result(:,1) <= ub & raw_final_result(:,3) >=0.90;
+   sub_temp = final_result_time(:,1) >= lb & final_result_time(:,1) <= ub & final_result_time(:,3) >=0.90;
+   morning_sub = final_result_time(:,1) >= lb & final_result_time(:,1) <= (lb+0.5) & final_result_time(:,3) >=0.90;
+   afternoon_sub = final_result_time(:,1) >= (lb+0.5) & final_result_time(:,1) <= ub & final_result_time(:,3) >=0.90;
    if (sum(sub_temp) == 0) | (sum(morning_sub) < 10) | (sum(afternoon_sub) < 10)
       continue 
    end
@@ -64,11 +68,11 @@ for uni_i = 1:130 %1:130; 1:154
 %    end   
    % step 2: linear-interpolation to every 30 minutes between 6am to 6pm
    
-   temp_time    = raw_final_result(sub_temp, 1);
-   temp_array   = raw_final_result(sub_temp, 2);
+   temp_time    = final_result_time(sub_temp, 1);
+   temp_array   = final_result_time(sub_temp, 2);
 %    temp_time    = final_svd(sub_temp, 1);
 %    temp_array   = final_svd(sub_temp, 2);
-   %vpd_array    = vpd15fill(sub_temp,1);
+   vpd_array    = vpd15fill(sub_temp,1);
    % negative values are assigned to zero
    temp_array(temp_array<0) = 0;
    
@@ -113,18 +117,10 @@ for uni_i = 1:130 %1:130; 1:154
    for jj = 1:48
      if (halfhourly_result((uni_i-1)*48+jj,1)<temp_time(1) | halfhourly_result((uni_i-1)*48+jj,1)>temp_time(end))
          halfhourly_result((uni_i-1)*48+jj,2) = 0.00;
+         vpd_30min((uni_i-1)*48+jj,2) = 0.00;
      else
          halfhourly_result((uni_i-1)*48+jj,2) = mean(temp_array(temp_time >= halfhourly_result((uni_i-1)*48+jj,1) & temp_time < halfhourly_result((uni_i-1)*48+jj,1)+1/48));
-%          [subs,dists] = knnsearch(temp_time,halfhourly_result((uni_i-1)*48+jj,1),'K',2);
-%          weight1 = 1/abs(temp_time(subs(1))-halfhourly_result((uni_i-1)*48+jj,1));
-%          weight2 = 1/abs(temp_time(subs(2))-halfhourly_result((uni_i-1)*48+jj,1));
-%          if weight1 == Inf 
-%              halfhourly_result((uni_i-1)*48+jj,2) = temp_array(subs(1));
-%          elseif weight2 == Inf
-%              halfhourly_result((uni_i-1)*48+jj,2) = temp_array(subs(2));
-%          else
-%              halfhourly_result((uni_i-1)*48+jj,2) = (weight1*temp_array(subs(1))+weight2*temp_array(subs(2)))/(weight1+weight2);
-%          end
+         vpd_30min((uni_i-1)*48+jj,2) = mean(vpd_array(temp_time >= vpd_30min((uni_i-1)*48+jj,1) & temp_time < vpd_30min((uni_i-1)*48+jj,1)+1/48));
      end
    end
 %    
@@ -145,12 +141,9 @@ for uni_i = 1:130 %1:130; 1:154
 %      end
 %    end
 %    
-%    % step 3: integrate SIFflux to SIFdaily
-%    daily_raw_result(uni_i,2) = sum(halfhourly_result(((uni_i-1)*48):(uni_i*48),2)*30*60);
-%    daily_raw_result(uni_i,3) = sum(fivemin_result(((uni_i-1)*288):(uni_i*288),2)*5*60);
 end
 
 
-%save('SIF760daily_2013_SVD.mat');
+save([datapath,'SIF760daily.mat'],'-append');
 
 
