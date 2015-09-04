@@ -158,7 +158,7 @@ final_result = [time, f760, rsq, rmse];
 final_result_time = sortrows(final_result,1);
 
 raw_final_result = final_result_time;
-save('SIF760_result_2012_newtest.mat');
+%save('SIF760_result_2012_newtest.mat');
 
 % final_sfm = [time,f760,rsq,rmse];
 % final_sfm = sortrows(final_sfm,1);

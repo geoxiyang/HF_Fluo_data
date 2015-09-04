@@ -25,7 +25,7 @@ for ii = 1:xdim_ref
     ndvi(ii)= (NIR(ii) - R(ii))./(NIR(ii) + R(ii));
 end
 
-for uni_i = 6:6 %1:130
+for uni_i = 1:130
    
    % 1.Limit the data to the day of interest
    lb       = uni_i-1.0+170.;
