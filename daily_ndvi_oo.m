@@ -1,12 +1,15 @@
 % Calculate Daily mean NDVI from OceanOptic reflectance spectra
 
+
+
 clear all
 clc
 
-load('SIF760_result.mat','raw_ref_result','wl');
+load('SIF760_result_2013_newtest.mat','raw_ref_result','wl');
 load('hf_barn_2013_env.mat','cloud_ratio_daily');
 ref = raw_ref_result(:,2:end);
 [xdim_ref,ydim_ref] = size(ref);
+time = raw_ref_result(:,1);
 
 ndvi_day      = zeros(130,3);
 ndvi_day(:,1) = 170:1:299;
@@ -25,21 +28,24 @@ for ii = 1:xdim_ref
     ndvi(ii)= (NIR(ii) - R(ii))./(NIR(ii) + R(ii));
 end
 
-for uni_i = 1:130
+for uni_i = 1:30
    
    % 1.Limit the data to the day of interest
    lb       = uni_i-1.0+170.;
    ub       = uni_i+170;
    sub_temp = raw_ref_result(:,1) >= lb & raw_ref_result(:,1) <= ub;
    
-plot(raw_ref_result(sub_temp,1),ndvi(sub_temp),'ko')   
+   plot(raw_ref_result(sub_temp,1)-fix(raw_ref_result(sub_temp,1)),ndvi(sub_temp),'ko')   
+   ylim([0.8 0.9])
+   hold on
    
-   % 2.Calculate Daily NDVI
-   ndvi_tmp = ndvi(sub_temp);
-   ndvi_day(uni_i,2) = mean(ndvi_tmp(ndvi_tmp>0));
-   ndvi_day(uni_i,3) = std(ndvi_tmp(ndvi_tmp>0));     %STANDARD DEVIATION
+   
+%    % 2.Calculate Daily NDVI
+%    ndvi_tmp = ndvi(sub_temp);
+%    ndvi_day(uni_i,2) = mean(ndvi_tmp(ndvi_tmp>0));
+%    ndvi_day(uni_i,3) = std(ndvi_tmp(ndvi_tmp>0));     %STANDARD DEVIATION
     
 end
-
-plot(ndvi_day(:,1),ndvi_day(:,2),'ko');
-ylim([0 1]);
+hold off
+% plot(ndvi_day(:,1),ndvi_day(:,2),'ko');
+% ylim([0 1]);

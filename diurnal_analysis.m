@@ -321,19 +321,47 @@ load('/Volumes/XiYangResearch/Projects/1.SCOPE_HF/4.matlab/hf_hourly_2013_newtes
 % figure
 % scatter(sif_hourly(sub1),GPP(sub1));
 
+
+
 sif_yield = sif_hourly./apar_hourly;
 lue       = GPP./apar_hourly;
 
-for ii = 5:5 %1:79 1:173 5:130
+time1.year  = 2013;
+time1.month  = 6;
+time1.day    = 23;
+time1.min    = 0;
+time1.sec    = 0;
+time1.UTC    = -5;
+location.latitude = 42.5;
+location.longitude = -72.2;
+location.altitude = 100; 
+
+
+ii=1;
+
+for ii = 6:6 %1:79 1:173 5:130
     
-    sub1 =  doy_hourly >=ii+169 & doy_hourly <=ii+170 & GPP >0 & sif_hourly>0 & apar_hourly>0 & LE>0;
+    sub1 =  doy_hourly >=ii+169 & doy_hourly <=ii+170 & GPP >0 & sif_hourly>0 & apar_hourly>0 & GPP>0;
+    time_temp = doy_hourly(sub1) - fix(doy_hourly(sub1));
+    
+    for jj = 1:sum(sub1)
+    
+        time1.hour = time_temp(ii)*24;
+
+        sun_pos = sun_position(time1,location);
+
+        sun_azimuth(jj) = sun_pos.azimuth;
+        sun_zenith(jj)  = sun_pos.zenith;
+
+    end
+    
     
     %opfilepath = ['/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/diurnal/DOY_' num2str(ii+169) '.png'];
 
 %    [xData1, yData1] = prepareCurveData(sif_hourly(sub1), GPP(sub1));
-    [xData1, yData1] = prepareCurveData(sif_hourly(sub1), LE(sub1));
+    [xData1, yData1] = prepareCurveData(sif_hourly(sub1)./cos(sun_zenith'.*pi()/180.0), GPP(sub1));
 
-    [xData2, yData2] = prepareCurveData(lue(sub1), sif_yield(sub1));
+    [xData2, yData2] = prepareCurveData(lue(sub1), sif_yield(sub1)./cos(sun_zenith'.*pi()/180.0));
     
     if length(xData1) < 6 || length(xData2) <6
         continue
@@ -368,28 +396,28 @@ for ii = 5:5 %1:79 1:173 5:130
     legend('off')
     %legend( h, 'GPP vs. SIF', 'fit', 'Location', 'NorthEast' );
     % Label axes
-    xlabel('SIF(mw/m^{2}/nm/sr)','FontSize',20);
-    ylabel('LE(w/m^{2})','FontSize',20);%LE(w/m^{2})%GPP(umol/m^{2}/sec)
+    xlabel('SIF(mw/m^{2}/nm/sr)./COS(SZA)','FontSize',20);
+    ylabel('GPP(umol/m^{2}/sec','FontSize',20);%LE(w/m^{2})%GPP(umol/m^{2}/sec)
     
     hh = text(0.1,max(yData1)*1.1,['DOY' num2str(ii+169) '   ' 'r^{2}=' num2str(gof.rsquare,'%4.2f')]);
     hh.FontSize = 20;    
     hold off
     
-    opfilename = '/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/newfig/diurnal_LE_SIF_ROBUTSTOFF_APARcolored_summary_2012.ps';
-    
-    if exist(opfilename,'file')
-        print(gcf,'-dpsc',opfilename,'-append');
-    else
-        print(gcf,'-dpsc',opfilename);
-    end
-    
-    close(gcf);
+%     opfilename = '/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/newfig/diurnal_GPP_SIFcosSZA_ROBUTSTOFF_APARcolored_summary_2013.ps';
+%     
+%     if exist(opfilename,'file')
+%         print(gcf,'-dpsc',opfilename,'-append');
+%     else
+%         print(gcf,'-dpsc',opfilename);
+%     end
+%     
+%     close(gcf);
     
     % 2. PS file two: GPP vs. APAR, SIF vs. APAR
     
     figure
     
-    [ax,h1,h2] = plotyy(apar_hourly(sub1),GPP(sub1),apar_hourly(sub1),sif_hourly(sub1));
+    [ax,h1,h2] = plotyy(apar_hourly(sub1),GPP(sub1),apar_hourly(sub1),sif_hourly(sub1)./cos(sun_zenith'.*pi()/180.0));
     h1.LineStyle = 'none';
     h2.LineStyle = 'none';
     h1.Marker    = '.';
@@ -402,23 +430,23 @@ for ii = 5:5 %1:79 1:173 5:130
     set(ax(1),'XLim',[0,max(apar_hourly(sub1))*1.2],'YColor','r')
     set(ax(2),'XLim',[0,max(apar_hourly(sub1))*1.2],'YColor','b')
     
-    hh = text(100,max(yData1)*0.9,['DOY' num2str(ii+126) '   ' 'r^{2}=' num2str(gof.rsquare,'%4.2f')]);
+    hh = text(100,max(yData1)*0.9,['DOY' num2str(ii+169) '   ' 'r^{2}=' num2str(gof.rsquare,'%4.2f')]);
     hh.FontSize = 20; 
 
     set(ax,'FontSize',16);
     xlabel('APAR(umol/m^{2}/sec)','FontSize',20);
     ylabel(ax(1),'GPP(umol/m^{2}/sec)','FontSize',20);
-    ylabel(ax(2),'SIF(mw/m^{2}/nm/sr)','FontSize',20);
+    ylabel(ax(2),'SIF(mw/m^{2}/nm/sr)./COS(SZA)','FontSize',20);
     
-    opfilename = '/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/newfig/diurnal_GPP_APAR_SIF_APAR_summary_2012.ps';
-    
-    if exist(opfilename,'file')
-        print(gcf,'-dpsc',opfilename,'-append');
-    else
-        print(gcf,'-dpsc',opfilename);
-    end
-    
-    close(gcf);    
+%     opfilename = '/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/newfig/diurnal_GPP_APAR_SIF_APAR_summary_2012.ps';
+%     
+%     if exist(opfilename,'file')
+%         print(gcf,'-dpsc',opfilename,'-append');
+%     else
+%         print(gcf,'-dpsc',opfilename);
+%     end
+%     
+%     close(gcf);    
     
     % 3. PS file three: SIFy vs. LUE
     
@@ -428,20 +456,20 @@ for ii = 5:5 %1:79 1:173 5:130
     set(gca,'YLim',[0,max(yData2)*1.2],...
         'XLim',[0,max(xData2)*1.2],...
         'FontSize',16);
-    hh = text(min(yData2)*1.1,max(yData2)*1.1,['DOY' num2str(ii+126)]);
+    hh = text(min(yData2)*1.1,max(yData2)*1.1,['DOY' num2str(ii+169)]);
     hh.FontSize = 20; 
     xlabel('LUE','FontSize',20);
-    ylabel('SIFy','FontSize',20);%LE(w/m^{2})%GPP(umol/m^{2}/sec)    
+    ylabel('SIFy./COS(SZA)','FontSize',20);%LE(w/m^{2})%GPP(umol/m^{2}/sec)    
 
-    opfilename = '/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/newfig/diurnal_LUE_SIFy_APARcolored_summary_2012.ps';
-    
-    if exist(opfilename,'file')
-        print(gcf,'-dpsc',opfilename,'-append');
-    else
-        print(gcf,'-dpsc',opfilename);
-    end
-    
-    close(gcf); 
+%     opfilename = '/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/newfig/diurnal_LUE_SIFy_APARcolored_summary_2012.ps';
+%     
+%     if exist(opfilename,'file')
+%         print(gcf,'-dpsc',opfilename,'-append');
+%     else
+%         print(gcf,'-dpsc',opfilename);
+%     end
+%     
+%     close(gcf); 
     
     
     % 4. PS file four: SIFy vs. APAR and LUE vs. APAR
@@ -461,23 +489,23 @@ for ii = 5:5 %1:79 1:173 5:130
     set(ax(1),'XLim',[0,max(apar_hourly(sub1))*1.2],'YColor','r')
     set(ax(2),'XLim',[0,max(apar_hourly(sub1))*1.2],'YColor','b')
     
-    hh = text(100,max(yData1)*0.9,['DOY' num2str(ii+126) '   ' 'r^{2}=' num2str(gof.rsquare,'%4.2f')]);
+    hh = text(100,max(yData1)*0.9,['DOY' num2str(ii+169) '   ' 'r^{2}=' num2str(gof.rsquare,'%4.2f')]);
     hh.FontSize = 20; 
 
     set(ax,'FontSize',16);
     xlabel('APAR(umol/m^{2}/sec)','FontSize',20);
     ylabel(ax(1),'LUE','FontSize',20);
-    ylabel(ax(2),'SIFy','FontSize',20);
+    ylabel(ax(2),'SIFy./COS(SZA)','FontSize',20);
     
-    opfilename = '/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/newfig/diurnal_LUE_APAR_SIFy_APAR_summary_2012.ps';
-    
-    if exist(opfilename,'file')
-        print(gcf,'-dpsc',opfilename,'-append');
-    else
-        print(gcf,'-dpsc',opfilename);
-    end
-    
-    close(gcf);  
+%     opfilename = '/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/newfig/diurnal_LUE_APAR_SIFy_APAR_summary_2012.ps';
+%     
+%     if exist(opfilename,'file')
+%         print(gcf,'-dpsc',opfilename,'-append');
+%     else
+%         print(gcf,'-dpsc',opfilename);
+%     end
+%     
+%     close(gcf);  
     
     
     

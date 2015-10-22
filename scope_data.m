@@ -45,18 +45,18 @@ fluxesfilepath2     = '/Volumes/XiYangResearch/Data/6.HFData/hf004-01-final.xlsx
 airPfilepath        = '/Volumes/XiYangResearch/Data/6.HFData/hf001-10-15min-m.xlsx'; %There are some missing air pressure data from EMS, so we have to use this one
 
 % for 2012
-% load([datapath,'SIF760daily_2012_newtest.mat'],'halfhourly_result');
-% [rawdata,txt,raw]   = xlsread(radfilepath,'B12123:BK15914');
+load([datapath,'SIF760daily_2012_newtest.mat'],'halfhourly_result');
+[rawdata,txt,raw]   = xlsread(radfilepath,'B12123:BK15914');
 % [rawflux,txt2,raw2] = xlsread(fluxesfilepath1,'A182018:AG183913');
 % [rawflux2,txt3,raw3]= xlsread(fluxesfilepath2,'A182018:AL183913');
 % [rawflux3,txt4,raw4]= xlsread(airPfilepath,'Q265921:Q273600');
 
 % % for 2013
-load([datapath,'SIF760daily_2013_newcutoff.mat'],'halfhourly_result');
-[rawdata,txt,raw]   = xlsread(radfilepath,'B27531:BK33770');
-[rawflux,txt2,raw2] = xlsread(fluxesfilepath1,'A189698:AG192817');
-[rawflux2,txt3,raw3]= xlsread(fluxesfilepath2,'A189698:AL192817');
-[rawflux3,txt4,raw4]= xlsread(airPfilepath,'Q296737:Q309216');
+% load([datapath,'SIF760daily_2013_newcutoff.mat'],'halfhourly_result');
+% [rawdata,txt,raw]   = xlsread(radfilepath,'B27531:BK33770');
+% [rawflux,txt2,raw2] = xlsread(fluxesfilepath1,'A189698:AG192817');
+% [rawflux2,txt3,raw3]= xlsread(fluxesfilepath2,'A189698:AL192817');
+% [rawflux3,txt4,raw4]= xlsread(airPfilepath,'Q296737:Q309216');
 
 % % for 2014
 % load([datapath,'SIF760daily_2014_newtest.mat'],'halfhourly_result');
@@ -66,76 +66,79 @@ load([datapath,'SIF760daily_2013_newcutoff.mat'],'halfhourly_result');
 % [rawflux3,txt4,raw4]= xlsread(airPfilepath,'Q327650:Q344257');
 
 doy                 = rawdata(:,1);
-rin_30min           = rawdata(:,4);
-rli_30min           = rawdata(:,10);
-% 2012 Andrew's airt and rh data are not there (NA, comment out)
-airT_30min          = rawdata(:,61);
-rh_30min            = rawdata(:,62);
-tot_ppfd_30min      = rawdata(:,16);
-ref_ppfd_30min      = rawdata(:,17);
-blw1_ppfd_30min     = rawdata(:,18);
-blw2_ppfd_30min     = rawdata(:,19);
-blw3_ppfd_30min     = rawdata(:,20);
-blw4_ppfd_30min     = rawdata(:,21);
-apar_ppfd_30min     = tot_ppfd_30min - ref_ppfd_30min - nanmean([blw1_ppfd_30min,blw2_ppfd_30min,blw3_ppfd_30min,blw4_ppfd_30min],2);
-pri1_30min          = rawdata(:,53);
-pri2_30min          = rawdata(:,55);
-direct_rad          = rawdata(:,24);
-total_rad           = rawdata(:,22);
-sunny_portion       = direct_rad./total_rad;
-
-A                   = 8.07131;  
-B                   = 1730.63;
-C                   = 233.426;
-% For 2013 and 2014
-ea_30min            = 10.^(A-B./(C+airT_30min));
-vpd_30min           = ea_30min .* (100-rh_30min)./rh_30min;
-
-GPP                 = abs(rawflux(:,13));
-%GPP                 = rawflux(:,47);  %2014
-H                   = rawflux2(:,16);
-%H                   = rawflux(:,6);   %2014
-%airT_ems            = rawflux(:,8);   %2014
-airT_ems            = rawflux(:,17);    %rawflux2(:,28);
-rh_ems              = rawflux2(:,23);
-LE                  = rawflux2(:,17).*((2.502*1e6-(2.308*10e3.*airT_ems))*18*1e-3); %*1e-3; % NOTE: 2012 LE needs to multiply 1e-3 probably because the original data's unit is mol/m2
-% LE                  = rawflux(:,49); % 2014 used original
-doy_ems             = rawflux2(:,4);
-% doy_ems             = rawflux2(:,1); %2014
-windspeed           = rawflux2(:,5);
-% windspeed           = rawflux2(:,2); %2014
-
-airP                = rawflux3(:,1);
-% 2012
-% doy_airP            = (215+1/96):1/96:294;
-% 2013
- doy_airP            = (170+1/96):1/96:300;
-% 2014
-% doy_airP            = 127:1/96:(300-1/96);
-
-% calculate hourly data
-% 2013: 130; 2014: 173; 2012: 79
-totdays             = 130;
-doy_hourly          = nan(totdays*24,1);
-rin_hourly          = nan(totdays*24,1);
-rli_hourly          = nan(totdays*24,1);
-airT_hourly         = nan(totdays*24,1);
-rh_hourly           = nan(totdays*24,1);
-ea_hourly           = nan(totdays*24,1);
-sif_hourly          = nan(totdays*24,1);
-airP_hourly         = nan(totdays*24,1);
-apar_hourly         = nan(totdays*24,1);
-pri1_hourly         = nan(totdays*24,1);
-pri2_hourly         = nan(totdays*24,1);
-vpd_hourly          = nan(totdays*24,1);
-sunportion_hourly   = nan(totdays*24,1);
-% for 2012 airt and rh are hourly
+% rin_30min           = rawdata(:,4);
+% rli_30min           = rawdata(:,10);
+% % 2012 Andrew's airt and rh data are not there (NA, comment out)
+% % airT_30min          = rawdata(:,61);
+% % rh_30min            = rawdata(:,62);
+% tot_ppfd_30min      = rawdata(:,16);
+% ref_ppfd_30min      = rawdata(:,17);
+% blw1_ppfd_30min     = rawdata(:,18);
+% blw2_ppfd_30min     = rawdata(:,19);
+% blw3_ppfd_30min     = rawdata(:,20);
+% blw4_ppfd_30min     = rawdata(:,21);
+% apar_ppfd_30min     = tot_ppfd_30min - ref_ppfd_30min - nanmean([blw1_ppfd_30min,blw2_ppfd_30min,blw3_ppfd_30min,blw4_ppfd_30min],2);
+% pri1_30min          = rawdata(:,53);
+% pri2_30min          = rawdata(:,55);
+% direct_rad          = rawdata(:,24);
+% total_rad           = rawdata(:,22);
+% sunny_portion       = direct_rad./total_rad;
+% 
+% A                   = 8.07131;  
+% B                   = 1730.63;
+% C                   = 233.426;
+% % For 2013 and 2014
+% % ea_30min            = 10.^(A-B./(C+airT_30min));
+% % vpd_30min           = ea_30min .* (100-rh_30min)./rh_30min;
+% 
+% GPP                 = abs(rawflux(:,13));
+% %GPP                 = rawflux(:,47);  %2014
+% H                   = rawflux2(:,16);
+% %H                   = rawflux(:,6);   %2014
+% %airT_ems            = rawflux(:,8);   %2014
+% airT_ems            = rawflux(:,17);    %rawflux2(:,28);
+% rh_ems              = rawflux2(:,23);
+% LE                  = rawflux2(:,17).*((2.502*1e6-(2.308*10e3.*airT_ems))*18*1e-3); %*1e-3; % NOTE: 2012 LE needs to multiply 1e-3 probably because the original data's unit is mol/m2
+% % LE                  = rawflux(:,49); % 2014 used original
+% doy_ems             = rawflux2(:,4);
+% % doy_ems             = rawflux2(:,1); %2014
+% windspeed           = rawflux2(:,5);
+% % windspeed           = rawflux2(:,2); %2014
+% 
+% airP                = rawflux3(:,1);
+% % 2012
+%  doy_airP            = (215+1/96):1/96:294;
+% % 2013
+% % doy_airP            = (170+1/96):1/96:300;
+% % 2014
+% % doy_airP            = 127:1/96:(300-1/96);
+% 
+% % calculate hourly data
+% % 2013: 130; 2014: 173; 2012: 79
+totdays             = 79;
+% doy_hourly          = nan(totdays*24,1);
+% rin_hourly          = nan(totdays*24,1);
+% rli_hourly          = nan(totdays*24,1);
+% airT_hourly         = nan(totdays*24,1);
+% rh_hourly           = nan(totdays*24,1);
+% ea_hourly           = nan(totdays*24,1);
+% airP_hourly         = nan(totdays*24,1);
+% apar_hourly         = nan(totdays*24,1);
+% pri1_hourly         = nan(totdays*24,1);
+% pri2_hourly         = nan(totdays*24,1);
+% vpd_hourly          = nan(totdays*24,1);
+% sunportion_hourly   = nan(totdays*24,1);
+% % for 2012 airt and rh are hourly
 % airT_hourly         = airT_ems;
 % rh_hourly           = rh_ems;
 % ea_hourly           = 10.^(A-B./(C+airT_ems));
+% vpd_hourly          = ea_hourly .* (100-rh_hourly)./rh_hourly;
+% 
+% GPP(GPP<=0) = NaN;
+% LE(LE<=0)   = NaN;
 
-GPP(GPP<=0) = NaN;
-LE(LE<=0)   = NaN;
+sif_hourly          = nan(totdays*24,1);
+
 
 for ii = 1:totdays
    for jj = 1:24
@@ -143,28 +146,27 @@ for ii = 1:totdays
          lb = double(ii+doy(1)-1)+(jj-1)/24;
          ub = double(ii+doy(1)-1)+jj/24;
          
-         doy_hourly((ii-1)*24+jj)   = lb;
-         rin_hourly((ii-1)*24+jj)   = nanmean(rin_30min(doy>lb & doy<=ub));
-         rli_hourly((ii-1)*24+jj)   = nanmean(rli_30min(doy>lb & doy<=ub));
-         apar_hourly((ii-1)*24+jj)  = nanmean(apar_ppfd_30min(doy>lb & doy<=ub));
-         pri1_hourly((ii-1)*24+jj)  = nanmean(pri1_30min(doy>lb & doy<=ub));
-         pri2_hourly((ii-1)*24+jj)  = nanmean(pri2_30min(doy>lb & doy<=ub));
+%          doy_hourly((ii-1)*24+jj)   = lb;
+%          rin_hourly((ii-1)*24+jj)   = nanmean(rin_30min(doy>lb & doy<=ub));
+%          rli_hourly((ii-1)*24+jj)   = nanmean(rli_30min(doy>lb & doy<=ub));
+%          apar_hourly((ii-1)*24+jj)  = nanmean(apar_ppfd_30min(doy>lb & doy<=ub));
+%          pri1_hourly((ii-1)*24+jj)  = nanmean(pri1_30min(doy>lb & doy<=ub));
+%          pri2_hourly((ii-1)*24+jj)  = nanmean(pri2_30min(doy>lb & doy<=ub));
          
-        airT_hourly((ii-1)*24+jj)  = nanmean(airT_30min(doy>lb & doy<=ub));
-        rh_hourly((ii-1)*24+jj)    = nanmean(rh_30min(doy>lb & doy<=ub));
-        ea_hourly((ii-1)*24+jj)    = nanmean(ea_30min(doy>lb & doy<=ub));
-        vpd_hourly((ii-1)*24+jj)   = nanmean(vpd_30min(doy>lb & doy<=ub));
+%         airT_hourly((ii-1)*24+jj)  = nanmean(airT_30min(doy>lb & doy<=ub));
+%         rh_hourly((ii-1)*24+jj)    = nanmean(rh_30min(doy>lb & doy<=ub));
+%         ea_hourly((ii-1)*24+jj)    = nanmean(ea_30min(doy>lb & doy<=ub));
+%         vpd_hourly((ii-1)*24+jj)   = nanmean(vpd_30min(doy>lb & doy<=ub));
          
          sif_hourly((ii-1)*24+jj)   = nanmean(halfhourly_result(halfhourly_result(:,1)>=lb & halfhourly_result(:,1)<ub,2));
-         
-         airP_hourly((ii-1)*24+jj)  = nanmean(airP(doy_airP>lb & doy_airP<=ub));
-         
-         sunportion_hourly((ii-1)*24+jj) = nanmean(sunny_portion(doy>lb & doy<=ub));
+%          
+%          airP_hourly((ii-1)*24+jj)  = nanmean(airP(doy_airP>lb & doy_airP<=ub));
+%          
+%          sunportion_hourly((ii-1)*24+jj) = nanmean(sunny_portion(doy>lb & doy<=ub));
    end
 end
 
-vpd_hourly           = ea_hourly .* (100-rh_hourly)./rh_hourly;
-save('/Volumes/XiYangResearch/Projects/1.SCOPE_HF/4.matlab/hf_hourly_2013_newcutoff.mat');
+save('/Volumes/XiYangResearch/Projects/1.SCOPE_HF/4.matlab/hf_hourly_2012.mat','sif_hourly','-append');
 
 
 

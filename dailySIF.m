@@ -5,21 +5,24 @@ clear variables
 clc
 
 datapath = '/Volumes/XiYangResearch/Projects/9.Fluorescence/11.Matlab_data/';
-load([datapath,'SIF760_result_2013_newtest.mat'],'final_result_time');
+load([datapath,'SIF760_result_2012_newtest.mat'],'final_result_time');
 % load([datapath,'SIF760daily.mat'],'vpd15fill');
 % load('SIF760_2014_result.mat','final_result_time');
 % load('hf_2013_svd.mat','final_svd');
 % load([datapath,'hf_barn_2013_env.mat'],'cloud_ratio_daily');
 
+% Only data from year 2012 is multiplied by 0.6
+final_result_time(:,2) = final_result_time(:,2) *0.8;
+
 % DOY 170-299: 130 ; 2014: 127-300; 2012: 215-293
-daily_raw_result = zeros(130,3);  %174,3 %79,3 % 130,3
-daily_raw_result(:,1) = 170:1:299; %170:1:299;127:1:299; 215:1:293
+daily_raw_result = zeros(79,3);  %174,3 %79,3 % 130,3
+daily_raw_result(:,1) = 215:1:293; %170:1:299;127:1:299; 215:1:293
 
-halfhourly_result = zeros(130*48,2);  %174*48,2; 79*48 130*48
-halfhourly_result(:,1) = 170:(1/48):(300-1/48);  %127:(1/48):(281-1/48);170:(1/48):(300-1/48)?215:(1/48):(294-1/48)
+halfhourly_result = zeros(79*48,2);  %174*48,2; 79*48 130*48
+halfhourly_result(:,1) = 215:(1/48):(294-1/48);  %127:(1/48):(281-1/48);170:(1/48):(300-1/48)?215:(1/48):(294-1/48)
 
-hourly_result     = zeros(130*24,2); %130*24
-hourly_result(:,1) = 170:(1/24):(300-1/24); %127:(1/24):(300-1/24);215:(1/24):(294-1/24);170:(1/48):(300-1/48)
+hourly_result     = zeros(79*24,2); %130*24; 79*24
+hourly_result(:,1) = 215:(1/24):(294-1/24); %127:(1/24):(300-1/24);215:(1/24):(294-1/24);170:(1/48):(300-1/48)
 
 % vpd_30min = zeros(130*48,2);
 % vpd_30min(:,1) = 170:(1/48):(300-1/48);
@@ -53,15 +56,15 @@ hourly_result(:,1) = 170:(1/24):(300-1/24); %127:(1/24):(300-1/24);215:(1/24):(2
 % VPD_1400 = zeros(130,4);
 % VPD_1400(:,1) = 170:1:299;
 
-for uni_i = 1:130 %1:130; 1:174; 1:79
+for uni_i = 1:79 %1:130; 1:174; 1:79
    
    % Define the time
-   lb = uni_i-1.0+170;  %127 %215 %170
-   ub = uni_i+170;
+   lb = uni_i-1.0+215;  %127 %215 %170
+   ub = uni_i+215;
    % step 1: select good days
-   sub_temp = final_result_time(:,1) >= lb & final_result_time(:,1) <= ub & final_result_time(:,3) >=0.90 & final_result_time(:,2) <=5.0 & final_result_time(:,2) >= 0.0;
-   morning_sub = final_result_time(:,1) >= lb & final_result_time(:,1) <= (lb+0.5) & final_result_time(:,3) >=0.90 & final_result_time(:,2) <=5.0 & final_result_time(:,2) >= 0.0;
-   afternoon_sub = final_result_time(:,1) >= (lb+0.5) & final_result_time(:,1) <= ub & final_result_time(:,3) >=0.90 & final_result_time(:,2) <=5.0 & final_result_time(:,2) >= 0.0;
+   sub_temp = final_result_time(:,1) >= lb & final_result_time(:,1) <= ub & final_result_time(:,3) >=0.90 & final_result_time(:,2) <=3.0 & final_result_time(:,2) >= 0.0;
+   morning_sub = final_result_time(:,1) >= lb & final_result_time(:,1) <= (lb+0.5) & final_result_time(:,3) >=0.90 & final_result_time(:,2) <=3.0 & final_result_time(:,2) >= 0.0;
+   afternoon_sub = final_result_time(:,1) >= (lb+0.5) & final_result_time(:,1) <= ub & final_result_time(:,3) >=0.90 & final_result_time(:,2) <=3.0 & final_result_time(:,2) >= 0.0;
    if (sum(sub_temp) == 0) || (sum(morning_sub) < 3) || (sum(afternoon_sub) < 3)
       continue 
    end
@@ -161,6 +164,6 @@ for uni_i = 1:130 %1:130; 1:174; 1:79
 end
 
 
-save([datapath,'SIF760daily_2013_newcutoff.mat']);%,'-append');
+save([datapath,'SIF760daily_2012_newtest.mat']);%,'-append');
 
 
