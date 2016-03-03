@@ -18,17 +18,22 @@ clc
 global constants
 [constants] = define_constants();
  %HF_ts_daily_2015-09-15-1116
-work_dir    = '/Volumes/XiYangResearch/src/SCOPE/SCOPE_v1.53/output/HF_ts_daily_2015-10-07-1544/';      % Change the input folder for the run you want to plot
+work_dir    = '/Volumes/XiYangResearch/src/SCOPE/SCOPE_v1.53/output/Kenia_2010_2015-04-05-1614/';      % Change the input folder for the run you want to plot
 ofigure     = '/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/newfig/';
 %time_dir    = '/Volumes/XiYangResearch/src/SCOPE/data/input/dataset HF_ts/';
 
-load('/Volumes/XiYangResearch/Projects/1.SCOPE_HF/4.matlab/hf_hourly_2013_newtest.mat','GPP','H','LE','doy_hourly','sif_hourly','doy_ems','apar_hourly','sunportion_hourly');
+load('/Volumes/XiYangResearch/Projects/1.SCOPE_HF/4.matlab/hf_hourly_2013.mat','GPP','H','LE','doy_hourly','sif_hourly','doy_ems','apar_hourly','sunportion_hourly');
 
 wl          = dlmread([work_dir 'wl.dat'],'',2,0);
 fEnergy     = dlmread([work_dir 'fluorescence.dat'],'',2,0);
 fluxes      = dlmread([work_dir 'fluxes.dat'],'',2,0);
 para_combination = dlmread([work_dir 'pars_and_input_short.dat'],'',1,0);
 ref         = dlmread([work_dir 'reflectance.dat'],'',2,0);
+
+fEnergyPSI  = dlmread([work_dir 'fluorescencePSI.dat'],'',2,0);
+fEnergyPSII = dlmread([work_dir 'fluorescencePSII.dat'],'',2,0);
+
+ref_rad     = dlmread([work_dir 'spectrum_obsdir_optical.dat'],'',2,0);
 
 ndvi_SCOPE  = (ref(:,750-400+1)-ref(:,685-400+1))./(ref(:,750-400+1) + ref(:,685-400+1));
 pri_SCOPE   = (ref(:,531-400+1)-ref(:,570-400+1))./(ref(:,531-400+1) + ref(:,570-400+1));
@@ -47,49 +52,55 @@ f740        = fEnergy(:,740-639);
 f760        = fEnergy(:,760-639);                     % Common O2A retrieval wavelength
 f755        = fEnergy(:,755-639);                     % at the GOSAT wavelenght. Unit is: W m-2 s-1 um-1 sr-1
 
-% doy_SCOPE   = unique(fix(time));
-% doy_obs     = unique(fix(doy_hourly));
-% 
-% for ii = 1:length(doy_SCOPE)
-%     
-%     lb = doy_SCOPE(ii) + 0.25;
-%     ub = doy_SCOPE(ii) + 0.75;
-%     daily_model_A(ii)       = nanmean(A(time>=lb & time<ub));
-%     daily_model_LE(ii)      = nanmean(LE_SCOPE(time>=lb & time<ub));
-%     
-% end
-% 
-% for ii = 1:length(doy_SCOPE)
-%     
-%     lb = doy_SCOPE(ii) + 0.42;
-%     ub = doy_SCOPE(ii) + 0.60;
-%     daily_model_sif(ii)     = nanmean(f760(time>=lb & time<ub));
-%     
-% end
-% 
-% for jj = 1:length(doy_obs)
-%    
-%     lb = doy_obs(jj) + 0.25;
-%     ub = doy_obs(jj) + 0.75;
-%     daily_obs_GPP(jj) = nanmean(GPP(doy_hourly>=lb & doy_hourly<ub));
-%     daily_obs_LE(jj)  = nanmean(LE(doy_hourly>=lb & doy_hourly<ub));
-% 
-% end
-% 
-% for jj = 1:length(doy_obs)
-%    
-%     lb = doy_obs(jj) + 0.42;
-%     ub = doy_obs(jj) + 0.60;
-%     daily_obs_sif(jj) = nanmean(sif_hourly(doy_hourly>=lb & doy_hourly<ub));
-% 
-% end
-% 
-% doy_obs_1 = doy_obs(6:127);
+doy_SCOPE   = unique(fix(time));
+doy_obs     = unique(fix(doy_hourly));
+
+A(A<=0)     = NaN;
+LE_SCOPE(LE_SCOPE<0) = NaN;
+f760(f760<0.1) = NaN;
+
+f760yield   = f760./aPAR;
+
+for ii = 1:length(doy_SCOPE)
+    
+    lb = doy_SCOPE(ii) + 0.25;
+    ub = doy_SCOPE(ii) + 0.75;
+    daily_model_A(ii)       = nanmean(A(time>=lb & time<ub));
+    daily_model_LE(ii)      = nanmean(LE_SCOPE(time>=lb & time<ub));
+    
+end
+
+for ii = 1:length(doy_SCOPE)
+    
+    lb = doy_SCOPE(ii) + 0.25;
+    ub = doy_SCOPE(ii) + 0.75;
+    daily_model_sif(ii)     = nanmean(f760(time>=lb & time<ub));
+    
+end
+
+for jj = 1:length(doy_obs)
+   
+    lb = doy_obs(jj) + 0.25;
+    ub = doy_obs(jj) + 0.75;
+    daily_obs_GPP(jj) = nanmean(GPP(doy_hourly>=lb & doy_hourly<ub));
+    daily_obs_LE(jj)  = nanmean(LE(doy_hourly>=lb & doy_hourly<ub));
+
+end
+
+for jj = 1:length(doy_obs)
+   
+    lb = doy_obs(jj) + 0.25;
+    ub = doy_obs(jj) + 0.75;
+    daily_obs_sif(jj) = nanmean(sif_hourly(doy_hourly>=lb & doy_hourly<ub));
+
+end
+
+doy_obs_1 = doy_obs;%doy_obs(6:127);
 % daily_obs_sif = daily_obs_sif(6:127);
 % daily_obs_GPP = daily_obs_GPP(6:127);
 % daily_obs_LE  = daily_obs_LE(6:127);
-% sub_sif = daily_obs_sif >0;
-% 
+sub_sif = daily_obs_sif >0;
+
 % 
 % subplot(3,1,1)
 % plot(doy_SCOPE,daily_model_A,'ro',doy_obs_1,daily_obs_GPP,'bo')
@@ -100,8 +111,8 @@ f755        = fEnergy(:,755-639);                     % at the GOSAT wavelenght.
 % subplot(3,1,3)
 % plot(doy_SCOPE,daily_model_LE,'ro',doy_obs_1,daily_obs_LE,'bo')
 % title('LE')
-% print(gcf,'-dpng','-r300','/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/newfig/model_data_comp.png')
-% close(gcf)
+% % print(gcf,'-dpng','-r300','/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/newfig/model_data_comp_2014.png')
+% % close(gcf)
 
 
 day         = 175;
@@ -114,27 +125,27 @@ ofile3      = [ofigure 'doy' num2str(day) '_LE_obs_mod.png'];
 % ofile4      = [ofigure 'doy175_LUE_SIFy_diurnal.png'];
 % ofile5      = [ofigure 'seasonal_LUE_obs_mod.png'];
 
-time1.year  = 2013;
-time1.month  = 6;
-time1.day    = 23;
-time1.min    = 0;
-time1.sec    = 0;
-time1.UTC    = -5;
-location.latitude = 42.5;
-location.longitude = -72.2;
-location.altitude = 100; 
-
-
-for ii = 1:24
-    
-    time1.hour = ii;
-    
-    sun_pos = sun_position(time1,location);
-    
-    sun_azimuth(ii) = sun_pos.azimuth;
-    sun_zenith(ii)  = sun_pos.zenith;
-    
-end
+% time1.year  = 2013;
+% time1.month  = 6;
+% time1.day    = 23;
+% time1.min    = 0;
+% time1.sec    = 0;
+% time1.UTC    = -5;
+% location.latitude = 42.5;
+% location.longitude = -72.2;
+% location.altitude = 100; 
+% 
+% 
+% for ii = 1:24
+%     
+%     time1.hour = ii;
+%     
+%     sun_pos = sun_position(time1,location);
+%     
+%     sun_azimuth(ii) = sun_pos.azimuth;
+%     sun_zenith(ii)  = sun_pos.zenith;
+%     
+% end
 
 % plot(1:1:24,sun_azimuth,'k*')
 % hold on
@@ -153,45 +164,84 @@ sub0  = doy_ems>=min(time(timesub)) & doy_ems<=max(time(timesub));
 
 figure
 plot(time(timesub),f760(timesub),'r*',doy_ems(sub0),sif_hourly(sub0),'k*');
-figure
-plot(time(timesub),f760(timesub),'r*',doy_ems(sub0),sif_hourly(sub0)./cos(sun_zenith'.*pi()/180.0),'k*');
+xlabel('hour')
+ylabel('SIF')
+legend({'model';'observation'})
+% figure
+% plot(time(timesub),f760(timesub),'r*',doy_ems(sub0),sif_hourly(sub0)./cos(sun_zenith'.*pi()/180.0),'k*');
+print(gcf,'-dpng','-r300','/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/newfig/model_data_comp_SIF_DOY175_2013.png')
+close(gcf)
+
+
 
 figure
-plot(time(timesub),f760(timesub)./aPAR(timesub),'ro-',doy_ems(sub0),sif_hourly(sub0)./(apar_hourly(sub0).*cos(sun_zenith'.*pi()/180.0)),'ko-');
+plot(time(timesub),f760(timesub)./aPAR(timesub),'ro-',doy_ems(sub0),sif_hourly(sub0)./(apar_hourly(sub0)),'ko-'); %.*cos(sun_zenith'.*pi()/180.0)
+xlabel('hour')
+ylabel('SIFyield')
+legend({'model';'observation'})
+print(gcf,'-dpng','-r300','/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/newfig/model_data_comp_SIFyield_DOY175_2013.png')
+close(gcf)
+
 
 figure
 plot(time(timesub),A(timesub)./aPAR(timesub),'ro-',doy_ems(sub0),GPP(sub0)./(apar_hourly(sub0)),'ko-')
+xlabel('hour')
+ylabel('LUE')
+legend({'model';'observation'})
+print(gcf,'-dpng','-r300','/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/newfig/model_data_comp_LUE_DOY175_2013.png')
+close(gcf)
 
-figure
-plot(GPP(sub0)./(apar_hourly(sub0).*cos(sun_zenith'.*pi()/180.0)),sif_hourly(sub0)./(apar_hourly(sub0).*cos(sun_zenith'.*pi()/180.0)),'mo')
+
+figure 
+plot(GPP(sub0)./(apar_hourly(sub0)),sif_hourly(sub0)./(apar_hourly(sub0)),'mo') %.*cos(sun_zenith'.*pi()/180.0))
 hold on
 plot(A(timesub)./aPAR(timesub),f760(timesub)./aPAR(timesub),'b*')
 hold off
-
-scrsz = get(groot,'ScreenSize');
-figure('Position',[1 scrsz(4)/2 scrsz(3) scrsz(4)/2])
-
-subplot(1,3,1)
-plot(time(timesub),A(timesub),'ro',doy_ems(doy_ems>=min(time(timesub)) & doy_ems<=max(time(timesub))),GPP(doy_ems>=min(time(timesub)) & doy_ems<=max(time(timesub))),'ko');
-title('GPP','FontSize',16)
-% print(gcf,'-dpng','-r300',ofile5);
-% close(gcf)
-% 
-subplot(1,3,2)
-plot(time(timesub),f760(timesub),'r*',doy_ems(doy_ems>=min(time(timesub)) & doy_ems<=max(time(timesub))),sif_hourly(doy_ems>=min(time(timesub)) & doy_ems<=max(time(timesub))),'k*') %GPP./apar_hourly %A./aPAR
-title('SIF','FontSize',16)
-
-% ylim([0 0.1])
-% print(gcf,'-dpng','-r300',ofile5);
-% close(gcf)
-% 
-subplot(1,3,3)
-plot(time(timesub),LE_SCOPE(timesub),'r^',doy_ems(doy_ems>=min(time(timesub)) & doy_ems<=max(time(timesub))),LE(doy_ems>=min(time(timesub)) & doy_ems<=max(time(timesub))),'k^') %GPP./apar_hourly %A./aPAR
-title('LE','FontSize',16)
-
-set(gcf,'paperPositionMode','manual','PaperPosition',[0,0,14,6])
-print(gcf,'-dpng','-r300',ofile);
+xlabel('LUE')
+ylabel('SIFy')
+legend({'model';'observation'})
+print(gcf,'-dpng','-r300','/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/newfig/model_data_comp_SIFyVSLUE_DOY175_2013_1.png')
 close(gcf)
+
+figure 
+plot(GPP(sub0)./(apar_hourly(sub0)),sif_hourly(sub0)./(apar_hourly(sub0)),'mo') %.*cos(sun_zenith'.*pi()/180.0))
+hold on
+plot(A(timesub)./aPAR(timesub),f760(timesub)./aPAR(timesub),'b*')
+hold off
+set(gca,'XLim',[0,0.2])
+xlabel('LUE')
+ylabel('SIFy')
+legend({'model';'observation'})
+print(gcf,'-dpng','-r300','/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/newfig/model_data_comp_SIFyVSLUE_DOY175_2013_2.png')
+close(gcf)
+
+
+% 
+% scrsz = get(groot,'ScreenSize');
+% figure('Position',[1 scrsz(4)/2 scrsz(3) scrsz(4)/2])
+
+%doy_ems(doy_ems>=min(time(timesub)) & doy_ems<=max(time(timesub)))
+% subplot(1,3,1)
+% plot(time(timesub),A(timesub),'ro',time(timesub),GPP(doy_ems>=min(time(timesub)) & doy_ems<=min(time(timesub))+1.0),'ko');
+% title('GPP','FontSize',16)
+% % print(gcf,'-dpng','-r300',ofile5);
+% % close(gcf)
+% % 
+% subplot(1,3,2)
+% plot(time(timesub),f760(timesub),'r*',time(timesub),sif_hourly(doy_ems>=min(time(timesub)) & doy_ems<=min(time(timesub))+1.0),'k*') %GPP./apar_hourly %A./aPAR
+% title('SIF','FontSize',16)
+% 
+% % ylim([0 0.1])
+% % print(gcf,'-dpng','-r300',ofile5);
+% % close(gcf)
+% % 
+% subplot(1,3,3)
+% plot(time(timesub),LE_SCOPE(timesub),'r^',time(timesub),LE(doy_ems>=min(time(timesub)) & doy_ems<=min(time(timesub))+1.0),'k^') %GPP./apar_hourly %A./aPAR
+% title('LE','FontSize',16)
+
+% set(gcf,'paperPositionMode','manual','PaperPosition',[0,0,14,6])
+% print(gcf,'-dpng','-r300',ofile);
+% close(gcf)
 
 % ylim([0 0.1])
 % print(gcf,'-dpng','-r300',ofile5);

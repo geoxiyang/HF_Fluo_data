@@ -49,7 +49,7 @@ rad_time    = NaN(file_no);
 
 
 % 4422-4559 are DOY 175
-load('hf_2013.mat','rad_time','irrad_time')
+load('/Volumes/XiYangResearch/Projects/9.Fluorescence/11.Matlab_data/hf_2013.mat','rad_time','irrad_time')
 
 
 date0 = datenum(2013,1,1);   
@@ -61,7 +61,11 @@ jj=0;
 %4461 = DOY 175 around 13:30
 %4430 = DOY 175 around 11:00
 %4794
-for j=4422:4559 %1:file_no(1) %1:file_no(1) %1:file_no(1) %1:file_no(1)   4430:4430
+
+irrad_all = nan(4559-4222+1,2048);
+rad_all   = nan(4559-4222+1,2048);
+
+for j=4222:4559 %1:file_no(1) %1:file_no(1) %1:file_no(1) %1:file_no(1)   4430:4430
     
 	tenmin          = datenum([2013 1 1 0 10 0]) - datenum([2013 1 1 0 0 0]);
     irrad_time_tmp  = irrad_time(j);
@@ -74,7 +78,6 @@ for j=4422:4559 %1:file_no(1) %1:file_no(1) %1:file_no(1) %1:file_no(1)   4430:4
     end
     
     % open the irradiance file
-    
 
     fname_irrad = fullfile(strcat(datapath,'irrad/',irrad_path(j).name));
     temp_irrad  = dlmread(fname_irrad, ' ',3, 0);
@@ -83,112 +86,121 @@ for j=4422:4559 %1:file_no(1) %1:file_no(1) %1:file_no(1) %1:file_no(1)   4430:4
     fname_rad   = fullfile(strcat(datapath,'rad/',rad_path(rad_time_sub(1)).name));
     temp_rad    = dlmread(fname_rad, ' ',3, 0);
     
+    irrad_all(j-4222+1,:)   = temp_irrad(:,3).*coeff(:,1);
+    rad_all(j-4222+1,:)     = temp_rad(:,3).*coeff(:,2);
+    time_all(j-4222+1)      = irrad_time_tmp;
+    wl                      = temp_rad(:,5);
     % for 2012 data, shift irrad to the right by 3
  %   temp_irrad(:,3)  = circshift(temp_irrad(:,3),3);
     
-% SFM method =============
-
-    ref(j,:) = (temp_rad(:,3).*coeff(:,2))./((temp_irrad(:,3).*coeff(:,1))./pi());
-    wl       = temp_rad(:,5);
-   
-% Depth of O2A band
-    irrad_o2a(j)   = mean(temp_irrad(wl>=758 & wl<=759,3).*coeff(wl>=758 & wl<=759,1)) - mean(temp_irrad(wl>=761 & wl<=762,3).*coeff(wl>=761 & wl<=762,1));
-    rad_o2a(j)     = mean(temp_rad(wl>=758 & wl<=759,3).*coeff(wl>=758 & wl<=759,2))   - mean(temp_rad(wl>=761 & wl<=762,3).*coeff(wl>=761 & wl<=762,2));
-    
-    irrad_758(j)   = mean(temp_irrad(wl>=758 & wl<=759,3).*coeff(wl>=758 & wl<=759,1));
-    rad_758(j)     = mean(temp_rad(wl>=758 & wl<=759,3).*coeff(wl>=758 & wl<=759,2));
-%     plot(wl,ref(j,:),'b-')
-%     ylim([0 0.5])
-    % For O2A: 759-767.76, centered 760;
-    roi         = temp_rad(:,5)>759.00 & temp_rad(:,5)<767.76;
-    % For O2B: 682.00-692.00
-    % roi         = temp_rad(:,5)>682.00 & temp_rad(:,5)<692.00;
-    
-
-
-    %ref         = rad'./irrad';
-
-    % =====================================================================    
-    % =====================================================================
-    % Calculate SZA at the time of measurement
-    dstr        = datestr(irrad_time_tmp+date0-1,29);
-    
-    time1.month  = str2double(dstr(6:7));
-    time1.day    = str2double(dstr(9:10));
-    time1.min    = 0;
-    time1.sec    = 0;
-    time1.UTC    = -5;
-    location.latitude = 42.5;
-    location.longitude = -72.2;
-    location.altitude = 100; 
-    time1.hour   = 24.0*(irrad_time_tmp - fix(irrad_time_tmp));
-    
-    sun_pos = sun_position(time1,location);
-    sun_zenith  = sun_pos.zenith;
-    
-    
-    phase_angle(j) = acos(cos(sun_zenith*pi()/180)*cos(60*pi()/180)+sin(sun_zenith*pi()/180)*sin(60*pi()/180)*cos(sun_pos.azimuth*pi()/180));
-    % =====================================================================
-    % =====================================================================
-
-    wavelength  = temp_rad(roi,5);
-    rad         = temp_rad(roi,3).*coeff(roi,2);
-    % Here irradiance is multiplied by cos(SZA)  cos(sun_zenith*pi()/180)*
-    irrad       = temp_irrad(roi,3).*coeff(roi,1);
-    xdata       = [wavelength irrad]';
-    ydata       = rad';
-    
-    
-    sza(j)      = sun_zenith;
-%     irrad_o2a   = 
-%     rad_o2a     = 
-    
-    
-    % SFM fitting 
-    x0 = [0.1,0.0005,1,-0.001];
-    lb = [-inf,0,-inf,-inf];
-    ub = [inf,inf,inf,0];
-    options = optimset('TolX',1e-10,'TolFun',1e-10,'Display','off');
-    [x,SSresid] = lsqcurvefit(@radtrans,x0,xdata,ydata,lb,ub,options);
-    
-    SStotal = (length(ydata)-1) * var(ydata);
-    rsq(j) = 1 - SSresid/SStotal;
-    rmse(j) = (SSresid/(length(ydata)))^(0.5);
-    % For O2A: center 760
-    f760(j) = 760.0*x(4)+x(3);  
-    
-    [beta,resid,J,Sigma] = nlinfit(xdata,ydata,@radtrans,x0);
-    [ci,se]              = nlparci(beta,resid,'covar',Sigma); % need to modify nlparci to include se
-    f760_error(j)        = sqrt((760*se(4))^2+se(3)^2); %1-sigma error of SIF
-    
-    
-    %f760_error(j) = sqrt((760*se(4))^2+se(3)^2); %1-sigma error of SIF
-    % For O2B: center: 687
-%     f687(j) = 687.0*x(5)+x(6);  
+% % SFM method =============
+% 
+%     ref(j,:) = (temp_rad(:,3).*coeff(:,2))./((temp_irrad(:,3).*coeff(:,1))./pi());
+%     wl       = temp_rad(:,5);
+%    
+% % Depth of O2A band
+%     irrad_o2a(j)   = mean(temp_irrad(wl>=758 & wl<=759,3).*coeff(wl>=758 & wl<=759,1)) - mean(temp_irrad(wl>=761 & wl<=762,3).*coeff(wl>=761 & wl<=762,1));
+%     rad_o2a(j)     = mean(temp_rad(wl>=758 & wl<=759,3).*coeff(wl>=758 & wl<=759,2))   - mean(temp_rad(wl>=761 & wl<=762,3).*coeff(wl>=761 & wl<=762,2));
 %     
-%     [beta,resid,J,Sigma] = nlinfit(xdata,ydata,@radtrans,x0);
-%     [ci,se]   = nlparci(beta,resid,'covar',Sigma);
-%     f687_error(j) = sqrt((687*se(4))^2+se(3)^2); %1-sigma error of SIF
-
-% %SVD method=================
-% % temp_irrad(:,3)'
-%     spectra = struct('irrad', temp_final,...
-%                      'rad', temp_rad(:,3)',...
-%                      'ircoeff', coeff(:,1),...
-%                      'rcoeff', coeff(:,2),...
-%                      'wl', temp_rad(:,5));
-%     WL_range = [745.00,780.00]; % Including O2A: 717.00 780.00; 745.00 780.00
-%     SIF_result = SIF_SVD(spectra,WL_range,2,1,0.02,6);
-%     sif_svd(j) = SIF_result.SIF;
-%     sif_error(j) = SIF_result.SIF_error;
-% %    sif_day = [time_day,sif_svd(rad_idx)];
+%     irrad_758(j)   = mean(temp_irrad(wl>=758 & wl<=759,3).*coeff(wl>=758 & wl<=759,1));
+%     rad_758(j)     = mean(temp_rad(wl>=758 & wl<=759,3).*coeff(wl>=758 & wl<=759,2));
+% %     plot(wl,ref(j,:),'b-')
+% %     ylim([0 0.5])
+%     % For O2A: 759-767.76, centered 760;
+%     roi         = temp_rad(:,5)>759.00 & temp_rad(:,5)<767.76;
+%     % For O2B: 682.00-692.00
+%     % roi         = temp_rad(:,5)>682.00 & temp_rad(:,5)<692.00;
 %     
 % 
-% % record the time -- if the run went through
-time(j)         = irrad_time(j);
-    
+% 
+%     %ref         = rad'./irrad';
+% 
+%     % =====================================================================    
+%     % =====================================================================
+%     % Calculate SZA at the time of measurement
+%     dstr        = datestr(irrad_time_tmp+date0-1,29);
+%     
+%     time1.month  = str2double(dstr(6:7));
+%     time1.day    = str2double(dstr(9:10));
+%     time1.min    = 0;
+%     time1.sec    = 0;
+%     time1.UTC    = -5;
+%     location.latitude = 42.5;
+%     location.longitude = -72.2;
+%     location.altitude = 100; 
+%     time1.hour   = 24.0*(irrad_time_tmp - fix(irrad_time_tmp));
+%     
+%     sun_pos = sun_position(time1,location);
+%     sun_zenith  = sun_pos.zenith;
+%     
+%     
+%     phase_angle(j) = acos(cos(sun_zenith*pi()/180)*cos(60*pi()/180)+sin(sun_zenith*pi()/180)*sin(60*pi()/180)*cos(sun_pos.azimuth*pi()/180));
+%     % =====================================================================
+%     % =====================================================================
+% 
+%     wavelength  = temp_rad(roi,5);
+%     rad         = temp_rad(roi,3).*coeff(roi,2);
+%     % Here irradiance is multiplied by cos(SZA)  cos(sun_zenith*pi()/180)*
+%     irrad       = temp_irrad(roi,3).*coeff(roi,1);
+%     xdata       = [wavelength irrad]';
+%     ydata       = rad';
+%     
+%     
+%     sza(j)      = sun_zenith;
+% %     irrad_o2a   = 
+% %     rad_o2a     = 
+%     
+%     
+%     % SFM fitting 
+%     x0 = [0.1,0.0005,1,-0.001];
+%     lb = [-inf,0,-inf,-inf];
+%     ub = [inf,inf,inf,0];
+%     options = optimset('TolX',1e-10,'TolFun',1e-10,'Display','off');
+%     [x,SSresid] = lsqcurvefit(@radtrans,x0,xdata,ydata,lb,ub,options);
+%     
+%     SStotal = (length(ydata)-1) * var(ydata);
+%     rsq(j) = 1 - SSresid/SStotal;
+%     rmse(j) = (SSresid/(length(ydata)))^(0.5);
+%     % For O2A: center 760
+%     f760(j) = 760.0*x(4)+x(3);  
+%     
+%     [beta,resid,J,Sigma] = nlinfit(xdata,ydata,@radtrans,x0);
+%     [ci,se]              = nlparci(beta,resid,'covar',Sigma); % need to modify nlparci to include se
+%     f760_error(j)        = sqrt((760*se(4))^2+se(3)^2); %1-sigma error of SIF
+%     
+%     
+%     %f760_error(j) = sqrt((760*se(4))^2+se(3)^2); %1-sigma error of SIF
+%     % For O2B: center: 687
+% %     f687(j) = 687.0*x(5)+x(6);  
+% %     
+% %     [beta,resid,J,Sigma] = nlinfit(xdata,ydata,@radtrans,x0);
+% %     [ci,se]   = nlparci(beta,resid,'covar',Sigma);
+% %     f687_error(j) = sqrt((687*se(4))^2+se(3)^2); %1-sigma error of SIF
+% 
+% % %SVD method=================
+% % % temp_irrad(:,3)'
+% %     spectra = struct('irrad', temp_final,...
+% %                      'rad', temp_rad(:,3)',...
+% %                      'ircoeff', coeff(:,1),...
+% %                      'rcoeff', coeff(:,2),...
+% %                      'wl', temp_rad(:,5));
+% %     WL_range = [745.00,780.00]; % Including O2A: 717.00 780.00; 745.00 780.00
+% %     SIF_result = SIF_SVD(spectra,WL_range,2,1,0.02,6);
+% %     sif_svd(j) = SIF_result.SIF;
+% %     sif_error(j) = SIF_result.SIF_error;
+% % %    sif_day = [time_day,sif_svd(rad_idx)];
+% %     
+% % 
+% % % record the time -- if the run went through
+% time(j)         = irrad_time(j);
+%     
     
 end
+
+save('/Volumes/XiYangResearch/src/HF_Fluo_data/spectra_samples.mat','irrad_all','rad_all','time_all','wl');
+
+clear variables
+
 % Store the reflectance
 ref_final       = [time, ref];
 ref_final_time  = sortrows(ref_final,1);
