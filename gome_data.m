@@ -1,10 +1,10 @@
 % process GOME-2 data
 % Extract Harvard Forest SIF data (SIF 760)
 
-clear all
+clear variables
 clc
 
-filepath = '/Volumes/XiYangResearch/Data/2.SatelliteData/1.GOME-2/lvl3_monthly/';
+filepath = '/Volumes/XiYangResearch/Data/2.SatelliteData/1.GOME-2/GOME_F/GOME_F/MetOp-A/level3/';%'/Volumes/XiYangResearch/Data/2.SatelliteData/1.GOME-2/lvl3_v26_monthly/';
 cd(filepath)
 filename = dir([filepath '*.nc']);
 
@@ -20,24 +20,29 @@ Par_SIF740      = nan(numel(filename),720,360);
 Par_SIF740_SD   = nan(numel(filename),720,360);
 cos_SZA         = nan(numel(filename),720,360);
 timeym          = nan(numel(filename),2);
+counts_gome2    = nan(numel(filename),720,360);
 
 for i = 1:numel(filename) %numel(filename)
     display(['Reading ' filename(i).name]);
     id=netcdf.open(filename(i).name,'NOWRITE');
 
-    varSIF740 = netcdf.inqVarID(id,'SIF_740');
-    varSIF740_std = netcdf.inqVarID(id,'SIF_740_std');
-    varPar_SIF740 = netcdf.inqVarID(id,'Par_normalized_SIF_740');
-    varPar_SIF740_std = netcdf.inqVarID(id,'Par_normalized_SIF_740_std');
-    varcos_SZA = netcdf.inqVarID(id,'cos(SZA)');
-    varlat = netcdf.inqVarID(id,'latitude');
-    varlon = netcdf.inqVarID(id,'longitude');
+    varSIF740           = netcdf.inqVarID(id,'SIF_740');
+    varSIF740_std       = netcdf.inqVarID(id,'SIF_740_std');
+    varPar_SIF740       = netcdf.inqVarID(id,'Par_normalized_SIF_740');
+    varPar_SIF740_std   = netcdf.inqVarID(id,'Par_normalized_SIF_740_std');
+    varcos_SZA          = netcdf.inqVarID(id,'cos(SZA)');
+    varlat              = netcdf.inqVarID(id,'latitude');
+    varlon              = netcdf.inqVarID(id,'longitude');
+    varCounts           = netcdf.inqVarID(id,'Counts');
     
     SIF740_raw          = netcdf.getVar(id,varSIF740);
     SIF740_std_raw      = netcdf.getVar(id,varSIF740_std);
     Par_SIF740_raw      = netcdf.getVar(id,varPar_SIF740);
     Par_SIF740_std_raw  = netcdf.getVar(id,varPar_SIF740_std);
     cos_SZA_raw         = netcdf.getVar(id,varcos_SZA);
+    counts_gome2_raw    = netcdf.getVar(id,varCounts);
+    
+    
     lat                 = netcdf.getVar(id,varlat);
     lon                 = netcdf.getVar(id,varlon);
     year                = str2double(filename(i).name(end-13:end-10));
@@ -58,14 +63,15 @@ for i = 1:numel(filename) %numel(filename)
 % Pack all monthly SIF in a single file
 % Also store year/month data in a variable
 
-    timeym(i,1)     = year;
-    timeym(i,2)     = month;
-    SIF740(i,:,:)   = SIF740_raw;
-    SIF740_SD       = SIF740_std_raw;
-    Par_SIF740      = Par_SIF740_raw;
-    Par_SIF740_SD   = Par_SIF740_std_raw;
-    cos_SZA         = cos_SZA_raw;
-
+    timeym(i,1)                 = year;
+    timeym(i,2)                 = month;
+    SIF740(i,:,:)               = SIF740_raw;
+    SIF740_SD(i,:,:)            = SIF740_std_raw;
+    Par_SIF740(i,:,:)           = Par_SIF740_raw;
+    Par_SIF740_SD(i,:,:)        = Par_SIF740_std_raw;
+    cos_SZA(i,:,:)              = cos_SZA_raw;
+    counts_gome2(i,:,:)         = counts_gome2_raw;
+    
 end
 
-save('/Volumes/XiYangResearch/Projects/3.SIF_LEH/gome_monthly.mat')
+save('/Volumes/XiYangResearch/Projects/4.DiurnalLUE/2.Matlab/gome_monthly_v26_MetOpA.mat')
