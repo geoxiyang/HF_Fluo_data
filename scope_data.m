@@ -76,8 +76,10 @@ doy                 = rawdata(:,1);
 rin_30min           = rawdata(:,4);
 rli_30min           = rawdata(:,10);
 % % 2012 Andrew's airt and rh data are not there (NA, comment out)
+<<<<<<< HEAD
 airT_30min          = rawdata(:,61);
 rh_30min            = rawdata(:,62);
+
 tot_ppfd_30min      = rawdata(:,16);
 ref_ppfd_30min      = rawdata(:,17);
 blw1_ppfd_30min     = rawdata(:,18);
@@ -94,13 +96,13 @@ sunny_portion       = direct_rad./total_rad;
 ndvi_30min            = (rawdata(:,48)-rawdata(:,46))./(rawdata(:,46)+rawdata(:,48));
 evi_30min             = 2.5*((rawdata(:,48)-rawdata(:,46))./(6*rawdata(:,46)+rawdata(:,48)-7.5*rawdata(:,49)+1));
 
-
 A                   = 8.07131;  
 B                   = 1730.63;
 C                   = 233.426;
 % For 2013 and 2014
 ea_30min            = 10.^(A-B./(C+airT_30min));
 vpd_30min           = ea_30min .* (100-rh_30min)./rh_30min;
+
 % 
  GPP                 = abs(rawflux(:,13));
 %GPP                 = rawflux(:,47);  %2014
@@ -130,6 +132,17 @@ vpd_30min           = ea_30min .* (100-rh_30min)./rh_30min;
 % % calculate hourly data
 % % 2013: 130; 2014: 173; 2012: 79
 totdays             = 173;
+=======
+  doy_airP            = (215+1/96):1/96:294;
+% % 2013
+%  doy_airP            = (170+1/96):1/96:300;
+% % 2014
+% doy_airP            = 127:1/96:(300-1/96);
+% 
+% % calculate hourly data
+% % 2013: 130; 2014: 173; 2012: 79
+totdays             = 79;
+>>>>>>> origin/master
 doy_hourly          = nan(totdays*24,1);
 rin_hourly          = nan(totdays*24,1);
 rli_hourly          = nan(totdays*24,1);
@@ -142,12 +155,20 @@ pri1_hourly         = nan(totdays*24,1);
 pri2_hourly         = nan(totdays*24,1);
 vpd_hourly          = nan(totdays*24,1);
 sunportion_hourly   = nan(totdays*24,1);
+<<<<<<< HEAD
 co2_hourly          = nan(totdays*24,1);
 % % for 2012 airt and rh are hourly
 % airT_hourly         = airT_ems;
 % rh_hourly           = rh_ems;
 % ea_hourly           = 10.^(A-B./(C+airT_ems));
 % vpd_hourly          = ea_hourly .* (100-rh_hourly)./rh_hourly;
+=======
+% % for 2012 airt and rh are hourly
+airT_hourly         = airT_ems;
+rh_hourly           = rh_ems;
+ea_hourly           = 10.^(A-B./(C+airT_ems));
+vpd_hourly          = ea_hourly .* (100-rh_hourly)./rh_hourly;
+>>>>>>> origin/master
 % 
 GPP(GPP<=0) = NaN;
 LE(LE<=0)   = NaN;
@@ -185,17 +206,28 @@ for ii = 1:totdays
    end
 end
 
+<<<<<<< HEAD
 save('/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/4.matlab/hf_hourly_2014_newGPP.mat');
 
 %save('/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/4.matlab/hf_hourly_2014.mat','ndvi_hourly','evi_hourly','sif_hourly','-append');
+=======
+save('/Volumes/XiYangResearch/Projects/1.SCOPE_HF/4.matlab/hf_hourly_2012_newtimestamp.mat');
+
+%save('/Volumes/XiYangResearch/Projects/1.SCOPE_HF/4.matlab/hf_hourly_2014.mat','ndvi_hourly','evi_hourly','sif_hourly','-append');
+>>>>>>> origin/master
 
 
 
 
 %% Section 2: Arrange dataset for outputs
 
+<<<<<<< HEAD
 % load('/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/4.matlab/hf_hourly_2014.mat');
 % output_folder = '/Volumes/XiYangBackUp/src/SCOPE/data/input/dataset HF_ts_2014/';
+=======
+% load('/Volumes/XiYangResearch/Projects/1.SCOPE_HF/4.matlab/hf_hourly_2014.mat');
+% output_folder = '/Volumes/XiYangResearch/src/SCOPE/data/input/dataset HF_ts_2014/';
+>>>>>>> origin/master
 % 
 % year = repmat(2014,[length(doy_hourly),1]);
 % rin_hourly(rin_hourly<0) = 0.0;
