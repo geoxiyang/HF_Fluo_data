@@ -3,7 +3,7 @@
 clear variable
 clc
 
-data2012 = load('/Volumes/XiYangResearch/Projects/1.SCOPE_HF/4.matlab/hf_hourly_2012.mat',...
+data2012 = load('/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/4.matlab/hf_hourly_2012_newtimestamp.mat',...
              'GPP',...
              'H',...
              'LE',...
@@ -17,7 +17,7 @@ data2012 = load('/Volumes/XiYangResearch/Projects/1.SCOPE_HF/4.matlab/hf_hourly_
              'ndvi_hourly',...
              'evi_hourly');
          
-data2013 = load('/Volumes/XiYangResearch/Projects/1.SCOPE_HF/4.matlab/hf_hourly_2013.mat',...
+data2013 = load('/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/4.matlab/hf_hourly_2013_newtimestamp.mat',...
              'GPP',...
              'H',...
              'LE',...
@@ -31,7 +31,7 @@ data2013 = load('/Volumes/XiYangResearch/Projects/1.SCOPE_HF/4.matlab/hf_hourly_
              'ndvi_hourly',...
              'evi_hourly');
          
-data2014 = load('/Volumes/XiYangResearch/Projects/1.SCOPE_HF/4.matlab/hf_hourly_2014.mat',...
+data2014 = load('/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/4.matlab/hf_hourly_2014_newtimestamp.mat',...
              'GPP',...
              'H',...
              'LE',...
@@ -55,6 +55,8 @@ data2014 = load('/Volumes/XiYangResearch/Projects/1.SCOPE_HF/4.matlab/hf_hourly_
 data2012.sif_hourly(data2012.sif_hourly<=0) = NaN;
 data2013.sif_hourly(data2013.sif_hourly<=0) = NaN;
 data2014.sif_hourly(data2014.sif_hourly<=0) = NaN;
+
+
 
 
 doy_tmp_2012    = unique(fix(data2012.doy_hourly));
@@ -153,6 +155,39 @@ for ii = 1:length(doy_tmp_2014)
     apar_th_daily_2014(ii,1)= nanmean(data2014.apar_hourly(data2014.apar_hourly>0 & data2014.sunportion_hourly > threshold & data2014.doy_hourly>=doy_tmp_2014(ii) & data2014.doy_hourly<doy_tmp_2014(ii)+1));
     
 end
+
+
+% figure
+% 
+% sif_yield = data2013.sif_hourly./data2013.apar_hourly;
+% lue       = data2013.GPP./data2013.apar_hourly;
+% 
+% subs      = data2013.sunportion_hourly>0.5 & sif_yield > 0 & lue>0;
+% 
+% subplot(2,2,1)
+% plot(data2013.sif_hourly(subs),data2013.GPP(subs),'b.','MarkerSize',12)
+% xlabel('SIF(mw m^{-2} s^{-1} sr^{-1})')
+% ylabel('GPP(\mumol m^{-2} s^{-1})')
+% set(gca,'FontSize',12)
+% subplot(2,2,2)
+% plot(sif_yield(subs),lue(subs),'m.','MarkerSize',12)
+% xlabel('SIFy')
+% ylabel('LUE')
+% set(gca,'FontSize',12)
+% subplot(2,2,3)
+% plot(sif_th_daily_2013,gpp_th_daily_2013,'b^','MarkerSize',12)
+% xlabel('Daily mean SIF(mw m^{-2} s^{-1} sr^{-1})')
+% ylabel('Daily mean GPP(\mumol m^{-2} s^{-1})')
+% set(gca,'FontSize',12)
+% subplot(2,2,4)
+% plot(sif_th_daily_2013./apar_th_daily_2013,gpp_th_daily_2013./apar_th_daily_2013,'m^','MarkerSize',12)
+% xlabel('Daily SIFy')
+% ylabel('Daily LUE')
+% 
+% set(gca,'FontSize',12)
+% print('/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/1.JPG/newfig/HF_2013_forAGUposter.eps',gcf,'-depsc','-tiff')
+% close(gcf)
+
 
 gpp_daily_all   = [gpp_daily_2012;gpp_daily_2013;gpp_daily_2014];
 le_daily_all    = [le_daily_2012;le_daily_2013;le_daily_2014];
@@ -328,9 +363,9 @@ sif_daily_all(sif_daily_all>1.1) = NaN;
 % xlabel('Day of Year since 2012-01-01','FontSize',fontsize,'FontName',fonttype);
 % ylabel({'APAR';'(umol/m^{2}/sec)'},'FontSize',fontsize,'FontName',fonttype);%LE(w/m^{2})%GPP(umol/m^{2}/sec)  
 % 
-% export_fig('/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/SIF_GPP_APAR_HF.png','-r300','-dpng','-transparent','-nocrop')
+% export_fig('/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/1.JPG/SIF_GPP_APAR_HF.png','-r300','-dpng','-transparent','-nocrop')
 
-%print('-dpng','-r300','/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/SIF_GPP_APAR_HF.png')
+%print('-dpng','-r300','/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/1.JPG/SIF_GPP_APAR_HF.png')
 %close(gcf)
 
 
@@ -398,7 +433,7 @@ sif_daily_all(sif_daily_all>1.1) = NaN;
 % 
 % set(gca,'FontName',FontName)
 % 
-% print('-dpng','-r300','/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/scatter_annual_SIF_GPP_linearonly.png')
+% print('-dpng','-r300','/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/1.JPG/scatter_annual_SIF_GPP_linearonly.png')
 % close(gcf)
 % % %-----------------------------------------
 % % %---------------Fig.2b--------------------
@@ -458,7 +493,7 @@ sif_daily_all(sif_daily_all>1.1) = NaN;
 %     'FontSize',16);
 % hold off
 % 
-% print('-dpng','-r300','/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/scatter_annual_SIF_LE.png')
+% print('-dpng','-r300','/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/1.JPG/scatter_annual_SIF_LE.png')
 % close(gcf)
 % 
 % %-----------------------------------------
@@ -501,7 +536,7 @@ sif_daily_all(sif_daily_all>1.1) = NaN;
 % 
 % set(gca,'FontName',FontName)
 % 
-% print('-dpng','-r300','/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/scatter_dailymean_APAR_SIF.png')
+% print('-dpng','-r300','/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/1.JPG/scatter_dailymean_APAR_SIF.png')
 % close(gcf)
 
 %% Fig.2d-f
@@ -509,9 +544,9 @@ sif_daily_all(sif_daily_all>1.1) = NaN;
 % 
 
 
-% filename1        = '/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/scatter_annual_hourly_SIF_GPP.png';
-% filename2        = '/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/scatter_annual_hourly_SIF_LE.png';
-% filename3        = '/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/scatter_annual_hourly_SIF_APAR.png';
+% filename1        = '/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/1.JPG/scatter_annual_hourly_SIF_GPP.png';
+% filename2        = '/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/1.JPG/scatter_annual_hourly_SIF_LE.png';
+% filename3        = '/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/1.JPG/scatter_annual_hourly_SIF_APAR.png';
 % 
 % %---------------Fig.2d--------------------
 % %-----------------------------------------
@@ -740,7 +775,7 @@ sif_daily_all(sif_daily_all>1.1) = NaN;
 % xlabel('LUE','FontSize',20);
 % ylabel('SIFy','FontSize',20);
 % 
-% print('-dpng','-r300','/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/lue_sify_daily_scatter_all.png')
+% print('-dpng','-r300','/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/1.JPG/lue_sify_daily_scatter_all.png')
 % 
 % close(gcf)
 % 
@@ -761,7 +796,7 @@ sif_daily_all(sif_daily_all>1.1) = NaN;
 % xlabel('LUE','FontSize',20);
 % ylabel('SIFy','FontSize',20);
 % 
-% print('-dpng','-r300','/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/lue_sify_hourly_scatter_all.png')
+% print('-dpng','-r300','/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/1.JPG/lue_sify_hourly_scatter_all.png')
 % 
 % close(gcf)
 
@@ -828,7 +863,7 @@ h1_pos = h1.Position;
 % a = get(gcf,'OuterPosition');
 % set(gcf,'OuterPosition',[a(1),a(2),a(3)+0.5,a(4)+0.5*a(4)/a(3)]);
 % set(gcf,'paperPositionMode','manual','PaperPosition',[0,0,14,8]) % make the print as big as the figure
-% print(gcf, '-dpng','-r300', '/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/EVI_GPP_SIF_fig_step1.png');
+% print(gcf, '-dpng','-r300', '/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/1.JPG/EVI_GPP_SIF_fig_step1.png');
 %close(gcf);
 
 % Step 2
@@ -843,7 +878,7 @@ plot(291.2,0.2,'kv','MarkerSize',20,'Parent',h1,'MarkerFaceColor','k')
 a = get(gcf,'OuterPosition');
 set(gcf,'OuterPosition',[a(1),a(2),a(3)+0.5,a(4)+0.5*a(4)/a(3)]);
 set(gcf,'paperPositionMode','manual','PaperPosition',[0,0,14,8]) % make the print as big as the figure
-print(gcf, '-dpng','-r300', '/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/EVI_GPP_SIF_fig_step2.png');
+print(gcf, '-dpng','-r300', '/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/1.JPG/EVI_GPP_SIF_fig_step2.png');
 %close(gcf);
 
 
@@ -873,7 +908,7 @@ line(xx2,yy2,'Parent',h3,'LineWidth',2,'Color','b');
 a = get(gcf,'OuterPosition');
 set(gcf,'OuterPosition',[a(1),a(2),a(3)+0.5,a(4)+0.5*a(4)/a(3)]);
 set(gcf,'paperPositionMode','manual','PaperPosition',[0,0,14,8]) % make the print as big as the figure
-print(gcf, '-dpng','-r300', '/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/EVI_GPP_SIF_fig_step3.png');
+print(gcf, '-dpng','-r300', '/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/1.JPG/EVI_GPP_SIF_fig_step3.png');
 %close(gcf);
 % get(h1,'Position')+[0 0 (20/190)*h1_pos(1,3) 0]
 h2     = axes( 'Position',get(h1,'Position')+[0 0 (20/190)*h1_pos(1,3) 0],...
@@ -901,7 +936,7 @@ line(xx1,yy1,'Parent',h2,'LineWidth',2,'Color','r');
 a = get(gcf,'OuterPosition');
 set(gcf,'OuterPosition',[a(1),a(2),a(3)+0.5,a(4)+0.5*a(4)/a(3)]);
 set(gcf,'paperPositionMode','manual','PaperPosition',[0,0,14,8]) % make the print as big as the figure
-print(gcf, '-dpng','-r300', '/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/EVI_GPP_SIF_fig_step4.png');
+print(gcf, '-dpng','-r300', '/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/1.JPG/EVI_GPP_SIF_fig_step4.png');
 close(gcf);
 
 
@@ -981,7 +1016,7 @@ hold off
 % hold off
 % 
 % % 
-% % print('-dpng','-r300','/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/2014_GPP_SIF_EVI.png')
+% % print('-dpng','-r300','/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/1.JPG/2014_GPP_SIF_EVI.png')
 % % 
 % % close(gcf)
 % 
@@ -1005,9 +1040,9 @@ hold off
 % % set(gcf,'OuterPosition',[a(1),a(2),a(3)+200,a(4)]);        %a(4)+0.2*a(4)/a(3)
 % % set(gcf,'paperPositionMode','manual','PaperPosition',[0,0,100,8])
 % %set(gca,'Color',[0 0 0])
-% export_fig('/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/Phenology_EVI_SIF_GPP.png','-r300','-dpng','-transparent','-nocrop')
+% export_fig('/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/1.JPG/Phenology_EVI_SIF_GPP.png','-r300','-dpng','-transparent','-nocrop')
 % 
-% %print('-dpng','-r300','/Volumes/XiYangResearch/Projects/1.SCOPE_HF/1.JPG/newfig/2014_airT_Rin_EVI_SIF_GPP.png')
+% %print('-dpng','-r300','/Volumes/XiYangBackUp/Projects/1.SCOPE_HF/1.JPG/newfig/2014_airT_Rin_EVI_SIF_GPP.png')
 % 
 % close(gcf)
 

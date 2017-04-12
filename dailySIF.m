@@ -4,8 +4,8 @@
 clear variables
 clc
 
-datapath = '/Volumes/XiYangResearch/Projects/9.Fluorescence/11.Matlab_data/';
-load([datapath,'SIF760_result_2014.mat'],'final_result_time');
+datapath = '/Volumes/XiYangBackUp/Projects/9.Fluorescence/11.Matlab_data/';
+load([datapath,'SIF760_result_2013_with750nm_Apr12-2017_ModifiedCoeff.mat'],'final_result_time');
 % load([datapath,'SIF760daily.mat'],'vpd15fill');
 % load('SIF760_2014_result.mat','final_result_time');
 % load('hf_2013_svd.mat','final_svd');
@@ -15,14 +15,19 @@ load([datapath,'SIF760_result_2014.mat'],'final_result_time');
 %final_result_time(:,2) = final_result_time(:,2) *0.8;
 
 % DOY 170-299: 130 ; 2014: 127-300; 2012: 215-293
-daily_raw_result = zeros(174,3);  %174,3 %79,3 % 130,3
-daily_raw_result(:,1) = 127:1:300; %170:1:300;127:1:299; 215:1:293
+daily_raw_result = zeros(130,3);  %174,3 %79,3 % 130,3
+daily_raw_result(:,1) = 170:1:299; %170:1:299;127:1:299; 215:1:293
 
-halfhourly_result = zeros(174*48,2);  %174*48,2; 79*48 130*48
-halfhourly_result(:,1) = 127:(1/48):(301-1/48);  %127:(1/24):(301-1/24);170:(1/48):(300-1/48)?215:(1/48):(294-1/48)
+halfhourly_result = zeros(130*48,2);  %174*48,2; 79*48 130*48
+halfhourly_result(:,1) = 170:(1/48):(300-1/48);  %127:(1/24):(301-1/24);170:(1/48):(300-1/48);215:(1/48):(294-1/48)
 
-hourly_result     = zeros(174*24); %130*24; 79*24 174*24
-hourly_result(:,1) = 127:(1/24):(301-1/24); %127:(1/24):(301-1/24);215:(1/24):(294-1/24);170:(1/48):(300-1/48)
+hourly_result     = zeros(130*24,2); %130*24; 79*24 174*24
+hourly_result(:,1) = 170:(1/24):(300-1/48); %127:(1/24):(301-1/24);215:(1/24):(294-1/24);170:(1/24):(300-1/48)
+
+hh_rad755         = zeros(130*48,2);
+hh_rad755(:,1)    = 170:(1/48):(300-1/48);  %127:(1/24):(301-1/24);170:(1/48):(300-1/48);215:(1/48):(294-1/48)
+hh_irrad755       = zeros(130*48,2);
+hh_irrad755(:,1)  = 170:(1/48):(300-1/48);  %127:(1/24):(301-1/24);170:(1/48):(300-1/48);215:(1/48):(294-1/48)
 
 % vpd_30min = zeros(130*48,2);
 % vpd_30min(:,1) = 170:(1/48):(300-1/48);
@@ -56,13 +61,13 @@ hourly_result(:,1) = 127:(1/24):(301-1/24); %127:(1/24):(301-1/24);215:(1/24):(2
 % VPD_1400 = zeros(130,4);
 % VPD_1400(:,1) = 170:1:299;
 
-for uni_i = 1:174 %1:130; 1:174; 1:79
+for uni_i = 1:130 %1:130; 1:174; 1:79
    
    % Define the time
-   lb = uni_i-1.0+127;  %127 %215 %170
-   ub = uni_i+127;
+   lb = uni_i-1.0+170;  %127 %215 %170
+   ub = uni_i+170;
    % step 1: select good days
-   sub_temp = final_result_time(:,1) >= lb & final_result_time(:,1) <= ub & final_result_time(:,3) >=0.95 & final_result_time(:,2) <=3.0 & final_result_time(:,2) >= 0.0;
+   sub_temp = final_result_time(:,1) >= lb & final_result_time(:,1) <= ub & final_result_time(:,3) >=0.90 & final_result_time(:,2) <=3.0 & final_result_time(:,2) >= 0.0;
    morning_sub = final_result_time(:,1) >= lb & final_result_time(:,1) <= (lb+0.5) & final_result_time(:,3) >=0.90 & final_result_time(:,2) <=3.0 & final_result_time(:,2) >= 0.0;
    afternoon_sub = final_result_time(:,1) >= (lb+0.5) & final_result_time(:,1) <= ub & final_result_time(:,3) >=0.90 & final_result_time(:,2) <=3.0 & final_result_time(:,2) >= 0.0;
    if (sum(sub_temp) == 0) || (sum(morning_sub) < 3) || (sum(afternoon_sub) < 3)
@@ -78,12 +83,15 @@ for uni_i = 1:174 %1:130; 1:174; 1:79
    
    temp_time    = final_result_time(sub_temp, 1);
    temp_array   = final_result_time(sub_temp, 2);
+   temp_rad755  = final_result_time(sub_temp, 6);
+   temp_irrad755= final_result_time(sub_temp, 7);
 %    temp_time    = final_svd(sub_temp, 1);
 %    temp_array   = final_svd(sub_temp, 2);
 %   vpd_array    = vpd15fill(sub_temp,1);
    % negative values are assigned to zero
    temp_array(temp_array<=0) = NaN;
-   
+   temp_rad755(temp_rad755<=0) = NaN;
+   temp_irrad755(temp_irrad755<=0) = NaN;
 %    sub_0930 = knnsearch(temp_time,9.5/24+lb,'K',1);
 %    SIF_0930(uni_i,2) = temp_array(sub_0930);   
 %    SIF_mean(uni_i,2) = mean(temp_array(temp_array>0));
@@ -125,9 +133,13 @@ for uni_i = 1:174 %1:130; 1:174; 1:79
    for jj = 1:48
      if (halfhourly_result((uni_i-1)*48+jj,1)<lb+6.0/24 || halfhourly_result((uni_i-1)*48+jj,1)>lb+18.0/24)
          halfhourly_result((uni_i-1)*48+jj,2) = 0.00;
+         hh_rad755((uni_i-1)*48+jj,2)         = 0.00;
+         hh_irrad755((uni_i-1)*48+jj,2)       = 0.00;
          %vpd_30min((uni_i-1)*48+jj,2) = 0.00;
      else
          halfhourly_result((uni_i-1)*48+jj,2) = nanmean(temp_array(temp_time >= halfhourly_result((uni_i-1)*48+jj,1) & temp_time < halfhourly_result((uni_i-1)*48+jj,1)+1/48));
+         hh_rad755((uni_i-1)*48+jj,2)         = nanmean(temp_rad755(temp_time >= hh_rad755((uni_i-1)*48+jj,1) & temp_time < hh_rad755((uni_i-1)*48+jj,1)+1/48));
+         hh_irrad755((uni_i-1)*48+jj,2)       = nanmean(temp_irrad755(temp_time >= hh_irrad755((uni_i-1)*48+jj,1) & temp_time < hh_irrad755((uni_i-1)*48+jj,1)+1/48));
          %vpd_30min((uni_i-1)*48+jj,2) = mean(vpd_array(temp_time >= vpd_30min((uni_i-1)*48+jj,1) & temp_time < vpd_30min((uni_i-1)*48+jj,1)+1/48));
      end
    end
@@ -135,10 +147,10 @@ for uni_i = 1:174 %1:130; 1:174; 1:79
    for jj = 1:24
      if (hourly_result((uni_i-1)*24+jj,1)<lb+6.0/24 || hourly_result((uni_i-1)*24+jj,1)>lb+18.0/24)
          hourly_result((uni_i-1)*24+jj,2) = 0.00;
-        % vpd_30min((uni_i-1)*48+jj,2) = 0.00;
+         % vpd_30min((uni_i-1)*48+jj,2) = 0.00;
      else
          hourly_result((uni_i-1)*24+jj,2) = nanmean(temp_array(temp_time >= hourly_result((uni_i-1)*24+jj,1) & temp_time < hourly_result((uni_i-1)*24+jj,1)+1/24));
-        % vpd_30min((uni_i-1)*48+jj,2) = mean(vpd_array(temp_time >= vpd_30min((uni_i-1)*48+jj,1) & temp_time < vpd_30min((uni_i-1)*48+jj,1)+1/48));
+         % vpd_30min((uni_i-1)*48+jj,2) = mean(vpd_array(temp_time >= vpd_30min((uni_i-1)*48+jj,1) & temp_time < vpd_30min((uni_i-1)*48+jj,1)+1/48));
      end
    end
 
@@ -164,6 +176,6 @@ for uni_i = 1:174 %1:130; 1:174; 1:79
 end
 
 
-save([datapath,'SIF760daily_2014_095thresh.mat']);%,'-append');
+save([datapath,'SIF760daily_2013_090thresh_withRad750.mat']);%,'-append');
 
 

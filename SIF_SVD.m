@@ -74,7 +74,7 @@ fl_index = selectRanges(spectra.wl,WL_range);
 %  This dataset is measured by Ari Kornfeld using several plants in
 %  Stanford campus
 %  FLraw: 1st column is wavelength, 2:8 are SVs (?)
-FLraw       = load('/Volumes/XiYangResearch/src/SIFviewer v2 source/FLshape3.mat');
+FLraw       = load('/Volumes/XiYangBackUp/src/SIFviewer v2 source/FLshape3.mat');
 %  FL_SV: interpolate the spectrum of fluorescence shape into current
 %  wavelength range
 FL_SV       = interp1(FLraw.FLshape3(:,1),FLraw.FLshape3(:,2:8),spectra.wl','pchip');
